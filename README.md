@@ -1,56 +1,47 @@
-<!--
-title: 'AWS Node Scheduled Cron example in NodeJS'
-description: 'This is an example of creating a function that runs as a cron job using the serverless ''schedule'' event.'
-layout: Doc
-framework: v4
-platform: AWS
-language: nodeJS
-priority: 1
-authorLink: 'https://github.com/0dj0bz'
-authorName: 'Rob Abbott'
-authorAvatar: 'https://avatars3.githubusercontent.com/u/5679763?v=4&s=140'
--->
+# Solar Forecast Bot
 
-# Serverless Framework Node Scheduled Cron on AWS
+This project is a Serverless AWS Lambda bot that fetches daily solar power forecasts and sends results to Telegram at scheduled times (Kyiv local time).
 
-This template demonstrates how to develop and deploy a simple cron-like service running on AWS Lambda using the Serverless Framework.
+## Features
 
-This examples defines a single function, `rateHandler` which is triggered by an event of `schedule` type at a rate of 1 per minute. For detailed information about `schedule` event, please refer to corresponding section of Serverless [docs](https://serverless.com/framework/docs/providers/aws/events/schedule/).
+- Fetches solar power forecast from [forecast.solar](https://forecast.solar/)
+- Sends results to a Telegram chat using the Telegram Bot API
+- Runs automatically at 7:00 and 22:00 Kyiv time (converted to UTC for AWS)
 
-## Usage
+## Environment Variables
 
-### Deployment
+Set these environment variables in your deployment environment or in `serverless.yml`:
 
-In order to deploy the example, you need to run the following command:
+- `TELEGRAM_TOKEN`: Your Telegram bot token
+- `TELEGRAM_CHAT_ID`: The chat ID to send messages to
+- `LAT`: Latitude of the solar plant location
+- `LON`: Longitude of the solar plant location
 
+Example for local testing:
+
+```bash
+TELEGRAM_TOKEN=xxx TELEGRAM_CHAT_ID=yyy LAT=50.00000 LON=30.00000 node index.js
 ```
+
+## Deployment
+
+Deploy to AWS Lambda using Serverless Framework:
+
+```bash
 serverless deploy
 ```
 
-After running deploy, you should see output similar to:
+## Scheduling
 
-```
-Deploying "aws-node-scheduled-cron" to stage "dev" (us-east-1)
+The function is scheduled to run at:
 
-✔ Service deployed to stack aws-node-scheduled-cron-dev (151s)
+- 7:00 Kyiv time (4:00 UTC during DST)
+- 22:00 Kyiv time (19:00 UTC during DST)
 
-functions:
-  rateHandler: aws-node-scheduled-cron-dev-rateHandler (2.3 kB)
+See `serverless.yml` for the cron expressions.
 
-```
+## References
 
-There is no additional step required. Your defined schedules becomes active right away after deployment.
-
-### Local development
-
-The easiest way to develop and test your function is to use the `dev` command:
-
-```
-serverless dev
-```
-
-This will start a local emulator of AWS Lambda and tunnel your requests to and from AWS Lambda, allowing you to interact with your function as if it were running in the cloud.
-
-Now you can invoke the function as before, but this time the function will be executed locally. Now you can develop your function locally, invoke it, and see the results immediately without having to re-deploy.
-
-When you are done developing, don't forget to run `serverless deploy` to deploy the function to the cloud.
+- [Serverless schedule event docs](https://serverless.com/framework/docs/providers/aws/events/schedule/)
+- [Telegram Bot API](https://core.telegram.org/bots/api)
+- [forecast.solar API](https://forecast.solar/)
