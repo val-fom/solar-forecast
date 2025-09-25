@@ -1,20 +1,21 @@
 <!--
-title: 'AWS Simple HTTP Endpoint example in NodeJS'
-description: 'This template demonstrates how to make a simple HTTP API with Node.js running on AWS Lambda and API Gateway using the Serverless Framework.'
+title: 'AWS Node Scheduled Cron example in NodeJS'
+description: 'This is an example of creating a function that runs as a cron job using the serverless ''schedule'' event.'
 layout: Doc
 framework: v4
 platform: AWS
 language: nodeJS
-authorLink: 'https://github.com/serverless'
-authorName: 'Serverless, Inc.'
-authorAvatar: 'https://avatars1.githubusercontent.com/u/13742415?s=200&v=4'
+priority: 1
+authorLink: 'https://github.com/0dj0bz'
+authorName: 'Rob Abbott'
+authorAvatar: 'https://avatars3.githubusercontent.com/u/5679763?v=4&s=140'
 -->
 
-# Serverless Framework Node HTTP API on AWS
+# Serverless Framework Node Scheduled Cron on AWS
 
-This template demonstrates how to make a simple HTTP API with Node.js running on AWS Lambda and API Gateway using the Serverless Framework.
+This template demonstrates how to develop and deploy a simple cron-like service running on AWS Lambda using the Serverless Framework.
 
-This template does not include any kind of persistence (database). For more advanced examples, check out the [serverless/examples repository](https://github.com/serverless/examples/) which includes Typescript, Mongo, DynamoDB and other examples.
+This examples defines a single function, `rateHandler` which is triggered by an event of `schedule` type at a rate of 1 per minute. For detailed information about `schedule` event, please refer to corresponding section of Serverless [docs](https://serverless.com/framework/docs/providers/aws/events/schedule/).
 
 ## Usage
 
@@ -29,30 +30,16 @@ serverless deploy
 After running deploy, you should see output similar to:
 
 ```
-Deploying "serverless-http-api" to stage "dev" (us-east-1)
+Deploying "aws-node-scheduled-cron" to stage "dev" (us-east-1)
 
-✔ Service deployed to stack serverless-http-api-dev (91s)
+✔ Service deployed to stack aws-node-scheduled-cron-dev (151s)
 
-endpoint: GET - https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com/
 functions:
-  hello: serverless-http-api-dev-hello (1.6 kB)
-```
-
-_Note_: In current form, after deployment, your API is public and can be invoked by anyone. For production deployments, you might want to configure an authorizer. For details on how to do that, refer to [HTTP API (API Gateway V2) event docs](https://www.serverless.com/framework/docs/providers/aws/events/http-api).
-
-### Invocation
-
-After successful deployment, you can call the created application via HTTP:
+  rateHandler: aws-node-scheduled-cron-dev-rateHandler (2.3 kB)
 
 ```
-curl https://xxxxxxx.execute-api.us-east-1.amazonaws.com/
-```
 
-Which should result in response similar to:
-
-```json
-{ "message": "Go Serverless v4! Your function executed successfully!" }
-```
+There is no additional step required. Your defined schedules becomes active right away after deployment.
 
 ### Local development
 

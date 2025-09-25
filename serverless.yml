@@ -1,7 +1,5 @@
 # "org" ensures this Service is used with the correct Serverless Framework Access Key.
 org: valentus
-# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
-app: my-bot
 # "service" is the name of this project. This will also be added to your AWS resource names.
 service: solar-forecast-bot
 
@@ -10,9 +8,7 @@ provider:
   runtime: nodejs20.x
 
 functions:
-  hello:
-    handler: handler.hello
+  rateHandler:
+    handler: handler.run
     events:
-      - httpApi:
-          path: /
-          method: get
+      - schedule: rate(1 minute)

@@ -1,8 +1,4 @@
-exports.hello = async (event) => {
-  return {
-    statusCode: 200,
-    body: JSON.stringify({
-      message: "Go Serverless v4! Your function executed successfully!",
-    }),
-  };
+exports.run = async () => {
+  const time = new Date();
+  console.log(`Your cron function ran at ${time}`);
 };
