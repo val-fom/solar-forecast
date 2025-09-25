@@ -6,9 +6,24 @@ service: solar-forecast-bot
 provider:
   name: aws
   runtime: nodejs20.x
+  region: eu-central-1
+  environment:
+    TELEGRAM_TOKEN: ${env:TELEGRAM_TOKEN}
+    TELEGRAM_CHAT_ID: ${env:TELEGRAM_CHAT_ID}
+    LAT: ${env:LAT}
+    LON: ${env:LON}
 
 functions:
   rateHandler:
     handler: handler.run
     events:
-      - schedule: rate(1 minute)
+      - schedule:
+          rate: cron(0 4 * * ? *)
+      - schedule:
+          rate: cron(0 19 * * ? *)
+
+package:
+  patterns:
+    - "**/*.js"
+  exclude:
+    - "index.js"

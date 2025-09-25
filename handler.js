@@ -1,4 +1,7 @@
-exports.run = async () => {
-  const time = new Date();
-  console.log(`Your cron function ran at ${time}`);
-};
+import { getForcast } from "./src/getForcast.js";
+import { sendResult } from "./src/sendResult.js";
+
+export async function run() {
+  const result = await getForcast();
+  await sendResult(JSON.stringify(result, null, 2));
+}
