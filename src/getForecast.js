@@ -23,7 +23,7 @@ function toKW(wattsPerDay) {
   }, {});
 }
 
-export async function getForcast() {
+export async function getForecast() {
   const tilt = 30;
   const results = await Promise.all([
     getFieldForecast(LAT, LON, tilt, 0, 1.32),
