@@ -24,6 +24,6 @@ functions:
 
 package:
   patterns:
-    - "**/*.js"
+    - "**/*.ts"
   exclude:
-    - "index.js"
+    - "index.ts"

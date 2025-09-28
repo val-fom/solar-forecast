@@ -1,6 +1,6 @@
 const { TELEGRAM_TOKEN, TELEGRAM_CHAT_ID } = process.env;
 
-export async function sendResult(text) {
+export async function sendResult(text: string): Promise<any> {
   if (typeof text !== "string") {
     text = JSON.stringify(text, null, 2);
   }
