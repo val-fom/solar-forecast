@@ -1,7 +1,9 @@
 const { TELEGRAM_TOKEN, TELEGRAM_CHAT_ID } = process.env;
 
 export async function sendResult(text) {
-  console.log("text: ", text);
+  if (typeof text !== "string") {
+    text = JSON.stringify(text, null, 2);
+  }
   const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(
     text
   )}`;
