@@ -1,4 +1,6 @@
-const { LAT, LON } = process.env;
+import config from "./config";
+
+const { LAT, LON } = config;
 
 async function getFieldForecast(
   lat: string,
@@ -32,9 +34,9 @@ function toKW(wattsPerDay: Record<string, number>): Record<string, string> {
 export async function getForecast(): Promise<Record<string, string>> {
   const tilt = 30;
   const results = await Promise.all([
-    getFieldForecast(LAT!, LON!, tilt, 0, 1.32),
-    getFieldForecast(LAT!, LON!, tilt, -90, 1.17),
-    getFieldForecast(LAT!, LON!, tilt, 90, 1.17),
+    getFieldForecast(LAT, LON, tilt, 0, 1.32),
+    getFieldForecast(LAT, LON, tilt, -90, 1.17),
+    getFieldForecast(LAT, LON, tilt, 90, 1.17),
   ]);
   return toKW(sumWatts(results));
 }

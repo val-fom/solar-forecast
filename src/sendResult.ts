@@ -1,4 +1,6 @@
-const { TELEGRAM_TOKEN, TELEGRAM_CHAT_ID } = process.env;
+import config from "./config";
+
+const { TELEGRAM_TOKEN, TELEGRAM_CHAT_ID } = config;
 
 export async function sendResult(text: string): Promise<any> {
   if (typeof text !== "string") {
