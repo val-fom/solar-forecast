@@ -2,12 +2,17 @@ import config from "./config";
 
 const { TELEGRAM_TOKEN, TELEGRAM_CHAT_ID } = config;
 
-export async function sendResult(text: any): Promise<any> {
-  if (typeof text !== "string") {
-    text = JSON.stringify(text, null, 2);
-  }
+export async function sendResult(...texts: any[]): Promise<any> {
+  const normalizedText = texts
+    .map((t) => {
+      if (typeof t !== "string") {
+        t = JSON.stringify(t, null, 2);
+      }
+      return t;
+    })
+    .join("\n");
   const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(
-    text
+    normalizedText,
   )}`;
   const response = await fetch(url);
   const result = await response.json();

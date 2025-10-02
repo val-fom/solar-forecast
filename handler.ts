@@ -1,7 +1,8 @@
 import { getForecast } from "./src/getForecast";
 import { sendResult } from "./src/sendResult";
+import { getDevicesStats } from "./src/getDevicesStats";
 
 export async function run(): Promise<void> {
-  const result = await getForecast();
-  await sendResult(result);
+  await sendResult("#forecast", await getForecast());
+  await sendResult("#mppt_totals", (await getDevicesStats()).totals);
 }
