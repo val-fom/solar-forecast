@@ -6,18 +6,34 @@ const { TUYA_DEVICE_ID } = config;
 
 const devices = TUYA_DEVICE_ID.split(",");
 
+type DeviceProperty = {
+  id: string;
+  properties: { code: string; value: string }[];
+};
+
+type DeviceStats = {
+  id: string;
+  pv_voltage: number;
+  bat_voltage: number;
+  bat_current: number;
+  power: number;
+  electric_total: number;
+  temp_current: number;
+};
+
+type DevicesTotals = {
+  bat_current: number;
+  power: number;
+  electric_total: number;
+};
+
 export async function getDevicesStats() {
   const devicesProps = await getDevicesProperties(devices);
   return deriveDeviceStats(devicesProps);
 }
 
-function deriveDeviceStats(
-  devicesProps: {
-    id: string;
-    properties: { code: string; value: string }[];
-  }[],
-) {
-  const devicesPropsMap = devicesProps.map((device) => {
+function deriveDeviceStats(devicesProps: DeviceProperty[]) {
+  const statsList: DeviceStats[] = devicesProps.map((device) => {
     const propsMap = device.properties.reduce((acc, prop) => {
       acc[prop.code] = prop.value;
       return acc;
@@ -34,7 +50,7 @@ function deriveDeviceStats(
     };
   });
 
-  const devicesTotals = devicesPropsMap.reduce(
+  const totals: DevicesTotals = statsList.reduce(
     (acc, device) => {
       acc.bat_current += device.bat_current;
       acc.power += device.power;
@@ -49,10 +65,18 @@ function deriveDeviceStats(
     },
   );
 
-  const result = {
-    propsMap: devicesPropsMap,
-    totals: devicesTotals,
+  const roundedTotals: DevicesTotals = {
+    bat_current: round(totals.bat_current),
+    power: round(totals.power),
+    electric_total: round(totals.electric_total),
   };
 
-  return result;
+  return {
+    devicesStats: statsList,
+    totals: roundedTotals,
+  };
+}
+
+function round(value: number, decimals: number = 2): number {
+  return Number(Math.round(Number(value + "e" + decimals)) + "e-" + decimals);
 }
