@@ -23,6 +23,7 @@ type DeviceStats = {
 
 type DevicesTotals = {
   bat_current: number;
+  bat_voltage: number;
   power: number;
   electric_total: number;
 };
@@ -60,6 +61,7 @@ function deriveDeviceStats(devicesProps: DeviceProperty[]) {
     },
     {
       bat_current: 0,
+      bat_voltage: statsList.find((d) => d.bat_voltage)?.bat_voltage || 0,
       electric_total: 0,
       power: 0,
     },
@@ -67,8 +69,9 @@ function deriveDeviceStats(devicesProps: DeviceProperty[]) {
 
   const roundedTotals: DevicesTotals = {
     bat_current: round(totals.bat_current),
-    power: round(totals.power),
+    bat_voltage: round(totals.bat_voltage),
     electric_total: round(totals.electric_total),
+    power: round(totals.power),
   };
 
   return {
