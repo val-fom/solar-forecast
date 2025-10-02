@@ -3,6 +3,10 @@ const REQUIRED_ENV_VARS = [
   "LON",
   "TELEGRAM_TOKEN",
   "TELEGRAM_CHAT_ID",
+  "TUYA_ACCESS_ID",
+  "TUYA_ACCESS_SECRET",
+  "TUYA_DEVICE_ID",
+  "TUYA_ENDPOINT",
 ] as const;
 
 type RequiredEnvVar = (typeof REQUIRED_ENV_VARS)[number];

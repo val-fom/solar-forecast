@@ -12,5 +12,8 @@
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^24.5.2"
+  },
+  "dependencies": {
+    "crypto": "^1.0.1"
   }
 }
