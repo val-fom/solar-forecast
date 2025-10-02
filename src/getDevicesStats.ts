@@ -41,11 +41,11 @@ function deriveDeviceStats(devicesProps: DeviceProperty[]) {
 
     return {
       id: device.id,
-      pv_voltage: parseInt(propsMap.pv_voltage) / 10,
-      bat_voltage: parseInt(propsMap.bat_voltage) / 10,
       bat_current: parseInt(propsMap.bat_current) / 10,
-      power: parseInt(propsMap.power) / 10,
+      bat_voltage: parseInt(propsMap.bat_voltage) / 10,
       electric_total: parseInt(propsMap.electric_total) / 10,
+      power: parseInt(propsMap.power) / 10,
+      pv_voltage: parseInt(propsMap.pv_voltage) / 10,
       temp_current: parseInt(propsMap.temp_current) / 10,
     };
   });
@@ -60,8 +60,8 @@ function deriveDeviceStats(devicesProps: DeviceProperty[]) {
     },
     {
       bat_current: 0,
-      power: 0,
       electric_total: 0,
+      power: 0,
     },
   );
 
