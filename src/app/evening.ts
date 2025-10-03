@@ -1,11 +1,9 @@
 import config from '../config'
 import { getForecast } from '../services/forecast/forecastService'
-import { sendResult } from '../integrations/telegram'
 import { getDevicesStats } from '../services/device-stats/deviceStatsService'
-import {
-  buildRemainingRequestsMessage,
-  toKW,
-} from '../services/forecast/forecastMessages'
+import { formatForecastMessage } from '../services/forecast/forecastFormatter'
+import { formatDeviceTotalsMessage } from '../services/device-stats/deviceStatsFormatter'
+import { sendResult } from '../integrations/telegram'
 
 const { SOUTH_ONLY } = config
 const southOnlyTag = SOUTH_ONLY === 'true' ? '(south only)' : null
@@ -13,15 +11,14 @@ const southOnlyTag = SOUTH_ONLY === 'true' ? '(south only)' : null
 export async function runEvening(): Promise<void> {
   try {
     const forecast = await getForecast()
-    await sendResult(
-      '#forecast',
-      toKW(forecast.result.watt_hours_day),
-      buildRemainingRequestsMessage(forecast),
+    const forecastMessage = formatForecastMessage(forecast, {
       southOnlyTag,
-    )
+    })
+    await sendResult(forecastMessage)
 
     const deviceStats = await getDevicesStats()
-    await sendResult('#mppt_totals', deviceStats.totals)
+    const totalsMessage = formatDeviceTotalsMessage(deviceStats.totals)
+    await sendResult(totalsMessage)
   } catch (error) {
     console.error('Error in evening function:', error)
     await sendResult('#error', error)
