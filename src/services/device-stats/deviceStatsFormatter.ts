@@ -4,7 +4,7 @@ function formatNumber(value: number): string {
   return value.toFixed(1)
 }
 
-export function formatDeviceTotalsMessage(totals: DevicesTotals): string {
+export function formatDeviceTotalsMessage(totals: DevicesTotals): string[] {
   const entries: Array<{
     icon: string
     label: string
@@ -17,30 +17,19 @@ export function formatDeviceTotalsMessage(totals: DevicesTotals): string {
     { icon: '📈', label: 'Total', value: totals.electric_total, unit: 'kWh' },
     {
       icon: '📊',
-      label: 'Yesterday',
-      value: totals.electric_total_yesterday,
+      label: 'Today',
+      value: totals.electric_total_diff,
       unit: 'kWh',
     },
-    { icon: '➕', label: 'Today', value: totals.electric_total_diff, unit: 'kWh' },
   ]
 
   const rows = entries.filter((entry) => entry.value !== undefined)
 
-  const labelWidth = rows.reduce(
-    (max, entry) => Math.max(max, entry.label.length),
-    0,
-  )
-  const valueWidth = rows.reduce((max, entry) => {
-    const text = `${formatNumber(entry.value as number)} ${entry.unit}`
-    return Math.max(max, text.length)
-  }, 0)
-
   const lines = rows.map((entry) => {
-    const label = entry.label.padEnd(labelWidth, ' ')
+    const label = entry.label
     const valueText = `${formatNumber(entry.value as number)} ${entry.unit}`
-    const paddedValue = valueText.padStart(valueWidth, ' ')
-    return `${entry.icon} ${label}: ${paddedValue}`
+    return `${entry.icon} ${label}: ${valueText}`
   })
 
-  return ['#mppt_totals', ...lines].join('\n')
+  return ['#mppt_totals', lines.join('\n')]
 }

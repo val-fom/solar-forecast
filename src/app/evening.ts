@@ -5,20 +5,15 @@ import { formatForecastMessage } from '../services/forecast/forecastFormatter'
 import { formatDeviceTotalsMessage } from '../services/device-stats/deviceStatsFormatter'
 import { sendResult } from '../integrations/telegram'
 
-const { SOUTH_ONLY } = config
-const southOnlyTag = SOUTH_ONLY === 'true' ? '(south only)' : null
-
 export async function runEvening(): Promise<void> {
   try {
     const forecast = await getForecast()
-    const forecastMessage = formatForecastMessage(forecast, {
-      southOnlyTag,
-    })
-    await sendResult(forecastMessage)
+    const forecastMessage = formatForecastMessage(forecast)
+    await sendResult(...forecastMessage)
 
     const deviceStats = await getDevicesStats()
     const totalsMessage = formatDeviceTotalsMessage(deviceStats.totals)
-    await sendResult(totalsMessage)
+    await sendResult(...totalsMessage)
   } catch (error) {
     console.error('Error in evening function:', error)
     await sendResult('#error', error)
