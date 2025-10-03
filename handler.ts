@@ -13,7 +13,7 @@ export async function morning(): Promise<void> {
       '#forecast',
       forecast.result.watt_hours_day,
       remainingRequestsLimitMessage(forecast),
-      southOnly ? '(south only)' : null,
+      southOnly ? '(#south_only)' : null,
     )
   } catch (error) {
     console.error('Error in morning function:', error)
