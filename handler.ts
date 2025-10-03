@@ -38,5 +38,5 @@ export async function evening(): Promise<void> {
 }
 
 function remainingRequestsLimitMessage(forecast: any): string {
-  return `remaining: ${Math.floor(forecast.message.ratelimit.remaining / 3)}`
+  return `remaining: ${Math.floor(forecast.message.ratelimit.remaining / 3)}` // doing 3 requests one call
 }
