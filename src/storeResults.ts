@@ -1,12 +1,13 @@
 import { randomUUID } from 'crypto'
 import config from './config'
 import { putItem } from './dynamoClient'
+import type { ForecastResult } from './getForecast'
 import type { DevicesStatsResult } from './getDevicesStats'
 
 const { FORECAST_TABLE_NAME, DEVICE_STATS_TABLE_NAME } = config
 
 export async function storeForecastResult(
-  payload: Record<string, string>,
+  payload: ForecastResult,
 ): Promise<void> {
   const timestamp = new Date().toISOString()
   await putItem(FORECAST_TABLE_NAME, {
