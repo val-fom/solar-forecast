@@ -4,7 +4,10 @@ function formatNumber(value: number): string {
   return value.toFixed(1)
 }
 
-export function formatDeviceTotalsMessage(totals: DevicesTotals): string[] {
+export function formatDeviceTotalsMessage(
+  totals: DevicesTotals,
+  time?: 'morning' | 'evening',
+): string[] {
   const entries: Array<{
     icon: string
     label: string
@@ -22,6 +25,8 @@ export function formatDeviceTotalsMessage(totals: DevicesTotals): string[] {
       unit: 'kWh',
     },
   ]
+  const dayTimeIcon =
+    time === 'morning' ? '🌅' : time === 'evening' ? '🏙️' : null
 
   const rows = entries.filter((entry) => entry.value !== undefined)
 
@@ -31,5 +36,9 @@ export function formatDeviceTotalsMessage(totals: DevicesTotals): string[] {
     return `${entry.icon} ${label}: ${valueText}`
   })
 
-  return ['#mppt_totals', lines.join('\n')]
+  return [
+    ...(dayTimeIcon ? [dayTimeIcon] : []),
+    '#mppt_totals',
+    lines.join('\n'),
+  ]
 }
