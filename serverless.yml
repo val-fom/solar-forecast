@@ -3,15 +3,30 @@ org: valentus
 # "service" is the name of this project. This will also be added to your AWS resource names.
 service: solar-forecast-bot
 
+custom:
+  forecastTableName: ${self:service}-${sls:stage}-forecast
+  deviceStatsTableName: ${self:service}-${sls:stage}-device-stats
+
 provider:
   name: aws
   runtime: nodejs20.x
   region: eu-central-1
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+          Resource:
+            - arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${self:custom.forecastTableName}
+            - arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${self:custom.deviceStatsTableName}
   environment:
     TELEGRAM_TOKEN: ${env:TELEGRAM_TOKEN}
     TELEGRAM_CHAT_ID: ${env:TELEGRAM_CHAT_ID}
     LAT: ${env:LAT}
     LON: ${env:LON}
+    FORECAST_TABLE_NAME: ${self:custom.forecastTableName}
+    DEVICE_STATS_TABLE_NAME: ${self:custom.deviceStatsTableName}
     TUYA_ACCESS_ID: ${env:TUYA_ACCESS_ID}
     TUYA_ACCESS_SECRET: ${env:TUYA_ACCESS_SECRET}
     TUYA_DEVICE_ID: ${env:TUYA_DEVICE_ID}
@@ -32,3 +47,28 @@ functions:
 package:
   patterns:
     - "**/*.ts"
+
+resources:
+  Resources:
+    ForecastTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.forecastTableName}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+    DeviceStatsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.deviceStatsTableName}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH

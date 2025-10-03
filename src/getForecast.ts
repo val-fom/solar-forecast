@@ -1,4 +1,5 @@
 import config from './config'
+import { storeForecastResult } from './storeResults'
 
 const { LAT, LON } = config
 
@@ -41,5 +42,7 @@ export async function getForecast(): Promise<Record<string, string>> {
     getFieldForecast(LAT, LON, tilt, -90, 1.17),
     getFieldForecast(LAT, LON, tilt, 90, 1.17),
   ])
-  return toKW(sumWatts(results))
+  const forecast = toKW(sumWatts(results))
+  await storeForecastResult(forecast)
+  return forecast
 }

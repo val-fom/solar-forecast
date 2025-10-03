@@ -1,6 +1,6 @@
-import { parse } from 'path'
 import config from './config'
 import { getDevicesProperties } from './tuya/getDevicesProperties'
+import { storeDeviceStatsResult } from './storeResults'
 
 const { TUYA_DEVICE_ID } = config
 
@@ -28,12 +28,19 @@ type DevicesTotals = {
   electric_total: number
 }
 
-export async function getDevicesStats() {
-  const devicesProps = await getDevicesProperties(devices)
-  return deriveDeviceStats(devicesProps)
+type DevicesStatsResult = {
+  devicesStats: DeviceStats[]
+  totals: DevicesTotals
 }
 
-function deriveDeviceStats(devicesProps: DeviceProperty[]) {
+export async function getDevicesStats(): Promise<DevicesStatsResult> {
+  const devicesProps = await getDevicesProperties(devices)
+  const stats = deriveDeviceStats(devicesProps)
+  await storeDeviceStatsResult(stats)
+  return stats
+}
+
+function deriveDeviceStats(devicesProps: DeviceProperty[]): DevicesStatsResult {
   const statsList: DeviceStats[] = devicesProps.map((device) => {
     const propsMap = device.properties.reduce(
       (acc, prop) => {
@@ -86,3 +93,5 @@ function deriveDeviceStats(devicesProps: DeviceProperty[]) {
 function round(value: number, decimals: number = 2): number {
   return Number(Math.round(Number(value + 'e' + decimals)) + 'e-' + decimals)
 }
+
+export type { DevicesStatsResult }

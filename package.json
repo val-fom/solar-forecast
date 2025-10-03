@@ -14,6 +14,8 @@
     "@types/node": "^24.5.2"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.632.0",
+    "@aws-sdk/lib-dynamodb": "^3.632.0",
     "crypto": "^1.0.1"
   }
 }
