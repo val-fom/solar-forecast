@@ -1,47 +1,99 @@
 # Solar Forecast Bot
 
-This project is a Serverless AWS Lambda bot that fetches daily solar power forecasts and sends results to Telegram at scheduled times (Kyiv local time).
+Serverless (AWS Lambda) automation that pulls a daily production forecast and live MPPT statistics, then relays neatly formatted updates to Telegram twice per day. A lightweight HTTPS endpoint also listens for `/manual_run` so the bot owner can trigger the workflow on demand via Telegram.
 
-## Features
+## Daily Flow
 
-- Fetches solar power forecast from [forecast.solar](https://forecast.solar/)
-- Sends results to a Telegram chat using the Telegram Bot API
-- Runs automatically at 7:00 and 22:00 Kyiv time (converted to UTC for AWS)
+- **Forecast** data comes from [forecast.solar](https://forecast.solar/); multiple field orientations are aggregated when both east/west strings are active.
+- **Device statistics** are fetched from Tuya-powered MPPT controllers and summarised (current, voltage, instantaneous power, daily totals, and deltas).
+- **Storage**: each run persists forecast snapshots and MPPT stats to DynamoDB tables for historical comparison.
+- **Delivery**: the results are formatted into emoji-friendly blocks and posted to the configured Telegram chat.
+- **Schedules**: CloudWatch cron triggers fire the `morning` Lambda at 04:00 UTC (07:00 Kyiv) and the `evening` Lambda at 19:00 UTC (22:00 Kyiv).
 
-## Environment Variables
+### Telegram Output Examples
 
-Set these environment variables in your deployment environment or in `serverless.yml`:
-
-- `TELEGRAM_TOKEN`: Your Telegram bot token
-- `TELEGRAM_CHAT_ID`: The chat ID to send messages to
-- `LAT`: Latitude of the solar plant location
-- `LON`: Longitude of the solar plant location
-
-Example for local testing:
-
-```bash
-TELEGRAM_TOKEN=xxx TELEGRAM_CHAT_ID=yyy LAT=50.00000 LON=30.00000 node index.js
+```text
+#forecast
+📅 2025-10-03: 2.3 kWh
+📅 2025-10-04: 2.3 kWh
+🔄 Req/h left: 3
+(#south_only)
 ```
 
-## Deployment
-
-Deploy to AWS Lambda using Serverless Framework:
-
-```bash
-serverless deploy
+```text
+#mppt_totals
+⚡ Current: 4.8 A
+🔋 Voltage: 53.5 V
+🔌 Power: 273.5 W
+📈 Total: 2106.3 kWh
+📊 Today: 8.7 kWh
 ```
 
-## Scheduling
+## Project Structure
 
-The function is scheduled to run at:
+```
+src/
+  app/                # Lambda entry orchestration
+  config/             # Environment variable loader
+  integrations/       # External API clients (forecast.solar, Telegram, Tuya)
+  persistence/        # DynamoDB repositories
+  services/           # Domain logic: forecast + device stats, formatters, types
+handler.ts            # Lambda exports (scheduled + manual HTTP endpoint)
+serverless.yml        # Infrastructure definition (cron + manual-run API)
+```
 
-- 7:00 Kyiv time (4:00 UTC during DST)
-- 22:00 Kyiv time (19:00 UTC during DST)
+## Configuration
 
-See `serverless.yml` for the cron expressions.
+| Variable                                | Description                                                                                                      |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `TELEGRAM_TOKEN`                        | Bot token issued by BotFather.                                                                                   |
+| `TELEGRAM_CHAT_ID`                      | Numeric chat ID that receives messages.                                                                          |
+| `LAT` / `LON`                           | Plant coordinates sent to forecast.solar.                                                                        |
+| `SOUTH_ONLY`                            | Set to `'true'` to fetch only south-facing string data (disables east/west strings) and reduce API request usage |
+| `FORECAST_TABLE_NAME`                   | Injected by Serverless; no manual change required.                                                               |
+| `DEVICE_STATS_TABLE_NAME`               | Injected by Serverless.                                                                                          |
+| `TUYA_ACCESS_ID` / `TUYA_ACCESS_SECRET` | Tuya cloud credentials.                                                                                          |
+| `TUYA_DEVICE_ID`                        | Comma-separated Tuya device IDs.                                                                                 |
+| `TUYA_ENDPOINT`                         | Tuya API base URL.                                                                                               |
 
-## References
+Populate these values in your shell (for local runs) or provide them to the Serverless deployment environment (e.g. via `.env` + `aws-vault`, CI secrets, or AWS Parameter Store).
 
-- [Serverless schedule event docs](https://serverless.com/framework/docs/providers/aws/events/schedule/)
+## Running Locally
+
+```bash
+sls invoke local -f <morning|evening|manualRun>
+```
+
+The local run will send real Telegram messages; ensure you point to a test chat before experimenting.
+
+## Deploying
+
+1. Install the Serverless CLI and configure AWS credentials with rights to deploy Lambda, API Gateway, and DynamoDB tables.
+2. Ensure the required environment variables are available to `serverless deploy` (for example, by exporting them in your shell or using a `.env` file consumed by your tooling).
+3. Deploy:
+
+   ```bash
+   serverless deploy
+   ```
+
+4. Copy the API Gateway URL emitted for the `manualRun` function (e.g. `https://xxxx.execute-api.eu-central-1.amazonaws.com/dev/manual-run`).
+5. Register the Telegram webhook so `/manual_run` commands reach the manual endpoint:
+
+   ```bash
+   curl --request POST \
+     --url https://api.telegram.org/bot${TELEGRAM_TOKEN}/setWebhook \
+     --header 'content-type: application/json' \
+     --data '{"url":"https://xxxx.execute-api.eu-central-1.amazonaws.com/dev/manual-run"}'
+   ```
+
+6. In Telegram, message `/manual_run` to the bot (from the whitelisted chat) to confirm the webhook works and to trigger an immediate update.
+7. Optionally, add the `/manual_run` command to your bot's command list using BotFather:
+   - Open a chat with [BotFather](https://t.me/botfather) in Telegram.
+   - Send `/mybots`, select your bot, then choose "Edit Commands".
+   - Add `/manual_run - Trigger an immediate update via the bot".
+
+## Useful References
+
+- [Serverless schedule event docs](https://www.serverless.com/framework/docs/providers/aws/events/schedule/)
 - [Telegram Bot API](https://core.telegram.org/bots/api)
 - [forecast.solar API](https://forecast.solar/)
