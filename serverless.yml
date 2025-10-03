@@ -57,19 +57,27 @@ resources:
         TableName: ${self:custom.forecastTableName}
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
-          - AttributeName: id
+          - AttributeName: type
+            AttributeType: S
+          - AttributeName: timestamp
             AttributeType: S
         KeySchema:
-          - AttributeName: id
+          - AttributeName: type
             KeyType: HASH
+          - AttributeName: timestamp
+            KeyType: RANGE
     DeviceStatsTable:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:custom.deviceStatsTableName}
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
-          - AttributeName: id
+          - AttributeName: type
+            AttributeType: S
+          - AttributeName: timestamp
             AttributeType: S
         KeySchema:
-          - AttributeName: id
+          - AttributeName: type
             KeyType: HASH
+          - AttributeName: timestamp
+            KeyType: RANGE

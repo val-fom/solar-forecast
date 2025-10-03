@@ -1,5 +1,10 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
-import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb'
+import {
+  DynamoDBDocumentClient,
+  PutCommand,
+  QueryCommand,
+  type QueryCommandInput,
+} from '@aws-sdk/lib-dynamodb'
 
 const documentClient = DynamoDBDocumentClient.from(new DynamoDBClient({}), {
   marshallOptions: {
@@ -17,4 +22,11 @@ export async function putItem(
       Item: item,
     }),
   )
+}
+
+export async function queryItems<T = Record<string, unknown>>(
+  input: QueryCommandInput,
+): Promise<T[]> {
+  const result = await documentClient.send(new QueryCommand(input))
+  return (result.Items ?? []) as T[]
 }

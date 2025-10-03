@@ -1,6 +1,7 @@
 import config from './config'
-import { getDevicesProperties } from './tuya/getDevicesProperties'
+import { getYesterdaysLastDeviceStats } from './getYesterdaysLastDeviceStats'
 import { storeDeviceStatsResult } from './storeResults'
+import { getDevicesProperties } from './tuya/getDevicesProperties'
 
 const { TUYA_DEVICE_ID } = config
 
@@ -26,6 +27,8 @@ type DevicesTotals = {
   bat_voltage: number
   power: number
   electric_total: number
+  electric_total_yesterday?: number
+  electric_total_diff?: number
 }
 
 type DevicesStatsResult = {
@@ -36,19 +39,22 @@ type DevicesStatsResult = {
 export async function getDevicesStats(): Promise<DevicesStatsResult> {
   const devicesProps = await getDevicesProperties(devices)
   const stats = deriveDeviceStats(devicesProps)
+  const yesterdayStats = await getYesterdaysLastDeviceStats()
+  if (yesterdayStats) {
+    stats.totals.electric_total_yesterday = yesterdayStats.totals.electric_total
+    stats.totals.electric_total_diff =
+      stats.totals.electric_total - yesterdayStats.totals.electric_total
+  }
   await storeDeviceStatsResult(stats)
   return stats
 }
 
 function deriveDeviceStats(devicesProps: DeviceProperty[]): DevicesStatsResult {
   const statsList: DeviceStats[] = devicesProps.map((device) => {
-    const propsMap = device.properties.reduce(
-      (acc, prop) => {
-        acc[prop.code] = prop.value
-        return acc
-      },
-      {} as Record<string, string>,
-    )
+    const propsMap = device.properties.reduce((acc, prop) => {
+      acc[prop.code] = prop.value
+      return acc
+    }, {} as Record<string, string>)
 
     return {
       id: device.id,
