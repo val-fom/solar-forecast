@@ -4,5 +4,5 @@ export function buildRemainingRequestsMessage(
   forecast: ForecastResult,
 ): string {
   const remaining = forecast.message.ratelimit.remaining
-  return `remaining: ${Math.floor(remaining / 3)}`
+  return `req/hr left: ${Math.floor(remaining / 3)}`
 }
