@@ -12,6 +12,10 @@ provider:
     TELEGRAM_CHAT_ID: ${env:TELEGRAM_CHAT_ID}
     LAT: ${env:LAT}
     LON: ${env:LON}
+    TUYA_ACCESS_ID: ${env:TUYA_ACCESS_ID}
+    TUYA_ACCESS_SECRET: ${env:TUYA_ACCESS_SECRET}
+    TUYA_DEVICE_ID: ${env:TUYA_DEVICE_ID}
+    TUYA_ENDPOINT: ${env:TUYA_ENDPOINT}
 
 functions:
   morning:
