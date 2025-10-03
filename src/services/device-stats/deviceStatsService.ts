@@ -1,40 +1,19 @@
-import config from './config'
-import { getYesterdaysLastDeviceStats } from './getYesterdaysLastDeviceStats'
-import { storeDeviceStatsResult } from './storeResults'
-import { getDevicesProperties } from './tuya/getDevicesProperties'
+import config from '../../config'
+import { getDevicesProperties } from '../../integrations/tuya'
+import { saveDeviceStatsResult } from '../../persistence/dynamo/deviceStatsRepository'
+import type {
+  DeviceProperty,
+  DevicesStatsResult,
+  DeviceStats,
+  DevicesTotals,
+} from './deviceStats.types'
+import { getYesterdaysLastDeviceStats } from './deviceStatsHistory'
 
 const { TUYA_DEVICE_ID } = config
 
 const devices = TUYA_DEVICE_ID.split(',')
-
-type DeviceProperty = {
-  id: string
-  properties: { code: string; value: string }[]
-}
-
-type DeviceStats = {
-  id: string
-  pv_voltage: number
-  bat_voltage: number
-  bat_current: number
-  power: number
-  electric_total: number
-  temp_current: number
-}
-
-type DevicesTotals = {
-  bat_current: number
-  bat_voltage: number
-  power: number
-  electric_total: number
-  electric_total_yesterday?: number
-  electric_total_diff?: number
-}
-
-type DevicesStatsResult = {
-  devicesStats: DeviceStats[]
-  totals: DevicesTotals
-}
+  .map((id) => id.trim())
+  .filter(Boolean)
 
 export async function getDevicesStats(): Promise<DevicesStatsResult> {
   const devicesProps = await getDevicesProperties(devices)
@@ -45,7 +24,7 @@ export async function getDevicesStats(): Promise<DevicesStatsResult> {
     stats.totals.electric_total_diff =
       stats.totals.electric_total - yesterdayStats.totals.electric_total
   }
-  await storeDeviceStatsResult(stats)
+  await saveDeviceStatsResult(stats)
   return stats
 }
 
@@ -58,12 +37,12 @@ function deriveDeviceStats(devicesProps: DeviceProperty[]): DevicesStatsResult {
 
     return {
       id: device.id,
-      bat_current: parseInt(propsMap.bat_current) / 10,
-      bat_voltage: parseInt(propsMap.bat_voltage) / 10,
-      electric_total: parseInt(propsMap.electric_total) / 10,
-      power: parseInt(propsMap.power) / 10,
-      pv_voltage: parseInt(propsMap.pv_voltage) / 10,
-      temp_current: parseInt(propsMap.temp_current) / 10,
+      bat_current: parseInt(propsMap.bat_current, 10) / 10,
+      bat_voltage: parseInt(propsMap.bat_voltage, 10) / 10,
+      electric_total: parseInt(propsMap.electric_total, 10) / 10,
+      power: parseInt(propsMap.power, 10) / 10,
+      pv_voltage: parseInt(propsMap.pv_voltage, 10) / 10,
+      temp_current: parseInt(propsMap.temp_current, 10) / 10,
     }
   })
 
@@ -99,5 +78,3 @@ function deriveDeviceStats(devicesProps: DeviceProperty[]): DevicesStatsResult {
 function round(value: number, decimals: number = 2): number {
   return Number(Math.round(Number(value + 'e' + decimals)) + 'e-' + decimals)
 }
-
-export type { DevicesStatsResult }

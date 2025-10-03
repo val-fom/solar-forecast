@@ -1,8 +1,6 @@
-import config from '../config.js'
-import { callTuya } from './callTuya.js'
-import { getTuyaToken } from './getTuyaToken.js'
-
-const { TUYA_DEVICE_ID } = config
+import { callTuya } from './callTuya'
+import { getTuyaToken } from '../auth/getTuyaToken'
+import type { DeviceProperty } from '../../../services/device-stats/deviceStats.types'
 
 type QueryPropertiesResponse = {
   properties: Property[]
@@ -17,7 +15,9 @@ type Property = {
   value: string
 }
 
-export async function getDevicesProperties(devices: string[]) {
+export async function getDevicesProperties(
+  devices: string[],
+): Promise<DeviceProperty[]> {
   const { access_token } = await getTuyaToken()
 
   const devicesStats = await Promise.all(

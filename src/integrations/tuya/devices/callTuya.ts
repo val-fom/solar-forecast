@@ -1,6 +1,6 @@
-import config from '../config'
-import { buildStringToSign } from './buildStringToSign'
-import { sign } from './sign'
+import config from '../../../config'
+import { buildStringToSign } from '../auth/buildStringToSign'
+import { sign } from '../auth/sign'
 
 const { TUYA_ACCESS_ID, TUYA_ENDPOINT } = config
 

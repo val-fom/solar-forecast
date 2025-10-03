@@ -1,5 +1,5 @@
 import crypto from 'crypto'
-import config from '../config'
+import config from '../../../config'
 
 const { TUYA_ACCESS_ID, TUYA_ACCESS_SECRET } = config
 

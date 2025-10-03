@@ -1,4 +1,4 @@
-import config from './config'
+import config from '../../config'
 
 const { TELEGRAM_TOKEN, TELEGRAM_CHAT_ID } = config
 
