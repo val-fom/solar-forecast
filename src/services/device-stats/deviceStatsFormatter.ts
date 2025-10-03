@@ -14,9 +14,9 @@ export function formatDeviceTotalsMessage(
     value: number | undefined
     unit: string
   }> = [
-    { icon: '🔋', label: 'Current', value: totals.bat_current, unit: 'A' },
-    { icon: '🔌', label: 'Voltage', value: totals.bat_voltage, unit: 'V' },
-    { icon: '⚡', label: 'Power', value: totals.power, unit: 'W' },
+    { icon: '⚡', label: 'Current', value: totals.bat_current, unit: 'A' },
+    { icon: '🔋', label: 'Voltage', value: totals.bat_voltage, unit: 'V' },
+    { icon: '🔌', label: 'Power', value: totals.power, unit: 'W' },
     { icon: '📈', label: 'Total', value: totals.electric_total, unit: 'kWh' },
     {
       icon: '📊',
