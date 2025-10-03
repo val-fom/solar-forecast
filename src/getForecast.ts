@@ -1,7 +1,9 @@
 import config from './config'
 import { storeForecastResult } from './storeResults'
 
-const { LAT, LON } = config
+const { LAT, LON, SOUTH_ONLY } = config
+
+const southOnly = SOUTH_ONLY === 'true'
 
 type WATTS = Record<string, number>
 
@@ -66,8 +68,8 @@ export async function getForecast(): Promise<ForecastResult> {
   const tilt = 30
   const results = await Promise.all([
     getFieldForecast(LAT, LON, tilt, 0, 1.32),
-    getFieldForecast(LAT, LON, tilt, -90, 1.17),
-    getFieldForecast(LAT, LON, tilt, 90, 1.17),
+    ...(southOnly ? [] : [getFieldForecast(LAT, LON, tilt, -90, 1.17)]),
+    ...(southOnly ? [] : [getFieldForecast(LAT, LON, tilt, 90, 1.17)]),
   ])
 
   const totalForecast: ForecastResult = {

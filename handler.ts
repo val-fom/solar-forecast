@@ -1,6 +1,10 @@
 import { getForecast } from './src/getForecast'
 import { sendResult } from './src/sendResult'
 import { getDevicesStats } from './src/getDevicesStats'
+import config from './src/config'
+
+const { SOUTH_ONLY } = config
+const southOnly = SOUTH_ONLY === 'true'
 
 export async function morning(): Promise<void> {
   try {
@@ -9,6 +13,7 @@ export async function morning(): Promise<void> {
       '#forecast',
       forecast.result.watt_hours_day,
       remainingRequestsLimitMessage(forecast),
+      southOnly ? '(south only)' : null,
     )
   } catch (error) {
     console.error('Error in morning function:', error)
@@ -23,6 +28,7 @@ export async function evening(): Promise<void> {
       '#forecast',
       forecast.result.watt_hours_day,
       remainingRequestsLimitMessage(forecast),
+      southOnly ? '(south only)' : null,
     )
     await sendResult('#mppt_totals', (await getDevicesStats()).totals)
   } catch (error) {

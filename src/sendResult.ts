@@ -4,6 +4,7 @@ const { TELEGRAM_TOKEN, TELEGRAM_CHAT_ID } = config
 
 export async function sendResult(...texts: any[]): Promise<any> {
   const normalizedText = texts
+    .filter(Boolean)
     .map((t) => {
       if (typeof t !== 'string') {
         t = JSON.stringify(t, null, 2)
