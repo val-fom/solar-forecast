@@ -1,5 +1,5 @@
-import { runMorning } from './src/app/morning'
-import { runEvening } from './src/app/evening'
+import { run } from './src/app/run'
 
-export const morning = runMorning
-export const evening = runEvening
+export const morning = () => run('morning')
+export const evening = () => run('evening')
+export const manualRun = run
