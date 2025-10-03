@@ -1,21 +1,21 @@
-import crypto from "crypto";
-import config from "../config";
+import crypto from 'crypto'
+import config from '../config'
 
-const { TUYA_ACCESS_ID, TUYA_ACCESS_SECRET } = config;
+const { TUYA_ACCESS_ID, TUYA_ACCESS_SECRET } = config
 
 export function sign({
   t,
   stringToSign,
-  accessToken = "",
+  accessToken = '',
 }: {
-  t: string;
-  stringToSign: string;
-  accessToken?: string;
+  t: string
+  stringToSign: string
+  accessToken?: string
 }): string {
-  const base = TUYA_ACCESS_ID + accessToken + t + stringToSign;
+  const base = TUYA_ACCESS_ID + accessToken + t + stringToSign
   return crypto
-    .createHmac("sha256", TUYA_ACCESS_SECRET)
-    .update(base, "utf8")
-    .digest("hex")
-    .toUpperCase();
+    .createHmac('sha256', TUYA_ACCESS_SECRET)
+    .update(base, 'utf8')
+    .digest('hex')
+    .toUpperCase()
 }
