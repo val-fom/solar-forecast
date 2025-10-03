@@ -17,6 +17,7 @@ provider:
         - Effect: Allow
           Action:
             - dynamodb:PutItem
+            - dynamodb:Query
           Resource:
             - arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${self:custom.forecastTableName}
             - arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${self:custom.deviceStatsTableName}
