@@ -45,10 +45,16 @@ functions:
     events:
       - schedule:
           rate: cron(0 19 * * ? *)
+  manualRun:
+    handler: handler.manualRun
+    events:
+      - http:
+          path: manual-run
+          method: post
 
 package:
   patterns:
-    - "**/*.ts"
+    - '**/*.ts'
 
 resources:
   Resources:

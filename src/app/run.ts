@@ -5,7 +5,7 @@ import { formatForecastMessage } from '../services/forecast/forecastFormatter'
 import { formatDeviceTotalsMessage } from '../services/device-stats/deviceStatsFormatter'
 import { sendResult } from '../integrations/telegram'
 
-export async function run(time: 'morning' | 'evening'): Promise<void> {
+export async function run(time?: 'morning' | 'evening'): Promise<void> {
   try {
     const forecast = await getForecast()
     const forecastMessage = formatForecastMessage(forecast, time)
