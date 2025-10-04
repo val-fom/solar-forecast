@@ -31,7 +31,7 @@ Serverless (AWS Lambda) automation that pulls a daily production forecast and li
 
 ## Project Structure
 
-```
+```text
 src/
   app/                # Lambda orchestration + manual webhook handler
   config/             # Environment variable loader
