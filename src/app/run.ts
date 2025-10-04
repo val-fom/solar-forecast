@@ -1,4 +1,3 @@
-import { evening } from './../../handler'
 import { getForecast } from '../services/forecast/forecastService'
 import { getDevicesStats } from '../services/device-stats/deviceStatsService'
 import { formatForecastMessage } from '../services/forecast/forecastFormatter'
