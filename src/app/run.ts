@@ -19,3 +19,14 @@ export async function run(time?: 'morning' | 'evening'): Promise<void> {
     await sendResult('#error', error)
   }
 }
+
+export async function sendDeviceStats(): Promise<void> {
+  try {
+    const deviceStats = await getDevicesStats()
+    const totalsMessage = formatDeviceTotalsMessage(deviceStats.totals)
+    await sendResult(...totalsMessage)
+  } catch (error) {
+    console.error(`Error in sendDeviceStats function:`, error)
+    await sendResult('#error', error)
+  }
+}

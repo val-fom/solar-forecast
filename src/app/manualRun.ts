@@ -1,5 +1,5 @@
 import config from '../config'
-import { run } from './run'
+import { sendDeviceStats, run } from './run'
 
 const { TELEGRAM_CHAT_ID } = config
 
@@ -14,6 +14,10 @@ export const manualRun = async (event: any) => {
 
   if (text === '/manual_run') {
     await run()
+  }
+
+  if (text === '/mppt_totals') {
+    await sendDeviceStats()
   }
 
   return { statusCode: 200 }
