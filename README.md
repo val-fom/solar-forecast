@@ -1,6 +1,6 @@
 # Solar Forecast Bot
 
-Serverless (AWS Lambda) automation that pulls a daily production forecast and live MPPT statistics, then relays neatly formatted updates to Telegram twice per day. A lightweight HTTPS endpoint also listens for `/manual_run` so the bot owner can trigger the workflow on demand via Telegram.
+Serverless (AWS Lambda) automation that pulls a daily production forecast and live MPPT statistics, then relays neatly formatted updates to Telegram twice per day. A lightweight HTTPS endpoint also listens for `/manual_run` to run the full workflow and `/mppt_totals` to fetch the latest MPPT totals on demand via Telegram.
 
 ## Daily Flow
 
@@ -33,12 +33,12 @@ Serverless (AWS Lambda) automation that pulls a daily production forecast and li
 
 ```
 src/
-  app/                # Lambda entry orchestration
+  app/                # Lambda orchestration + manual webhook handler
   config/             # Environment variable loader
   integrations/       # External API clients (forecast.solar, Telegram, Tuya)
   persistence/        # DynamoDB repositories
   services/           # Domain logic: forecast + device stats, formatters, types
-handler.ts            # Lambda exports (scheduled + manual HTTP endpoint)
+handler.ts            # Lambda exports (scheduled + manual HTTP endpoint proxies)
 serverless.yml        # Infrastructure definition (cron + manual-run API)
 ```
 
@@ -86,11 +86,11 @@ The local run will send real Telegram messages; ensure you point to a test chat 
      --data '{"url":"https://xxxx.execute-api.eu-central-1.amazonaws.com/dev/manual-run"}'
    ```
 
-6. In Telegram, message `/manual_run` to the bot (from the whitelisted chat) to confirm the webhook works and to trigger an immediate update.
-7. Optionally, add the `/manual_run` command to your bot's command list using BotFather:
+6. In Telegram, message `/manual_run` (full forecast + device stats) and `/mppt_totals` (device totals only) to confirm the webhook works as expected.
+7. Optionally, add both commands to your bot's command list using BotFather:
    - Open a chat with [BotFather](https://t.me/botfather) in Telegram.
    - Send `/mybots`, select your bot, then choose "Edit Commands".
-   - Add `/manual_run - Trigger an immediate update via the bot".
+   - Add `/manual_run - Trigger an immediate update` and `/mppt_totals - Fetch the latest device totals`.
 
 ## Useful References
 
