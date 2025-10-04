@@ -5,7 +5,8 @@ const { TELEGRAM_CHAT_ID } = config
 
 export const manualRun = async (event: any) => {
   const body = JSON.parse(event.body)
-  const { chat, text } = body.message || body.edited_message
+  const { chat, text } =
+    body.message || body.edited_message || body.my_chat_member || {}
 
   if (chat.id != TELEGRAM_CHAT_ID) {
     console.log(`User @${chat.username} tried to chat with me`)
