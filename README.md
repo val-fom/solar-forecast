@@ -23,7 +23,7 @@ Serverless (AWS Lambda) automation that pulls a daily production forecast and li
 ```text
 #mppt_totals
 ⚡ Current: 4.8 A
-🔋 V: 53.5 V (SOC: 68%)
+🔋 Voltage: 53.5 V (68%)
 🔌 Power: 273.5 W
 📈 Total: 2106.3 kWh
 📊 Today: 8.7 kWh

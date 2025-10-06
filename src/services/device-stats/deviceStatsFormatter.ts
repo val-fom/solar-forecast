@@ -20,7 +20,7 @@ export function formatDeviceTotalsMessage(
     { icon: '⚡', label: 'Current', value: totals.bat_current, unit: 'A' },
     {
       icon: SOCIcon,
-      label: 'V',
+      label: 'Voltage',
       value: totals.bat_voltage,
       unit: `V (${SOC}%)`,
     },
