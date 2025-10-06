@@ -5,7 +5,7 @@ Serverless (AWS Lambda) automation that pulls a daily production forecast and li
 ## Daily Flow
 
 - **Forecast** data comes from [forecast.solar](https://forecast.solar/); multiple field orientations are aggregated when both east/west strings are active.
-- **Device statistics** are fetched from Tuya-powered MPPT controllers and summarised (current, voltage, instantaneous power, daily totals, and deltas).
+- **Device statistics** are fetched from Tuya-powered MPPT controllers and summarised (current, voltage, state-of-charge estimate, instantaneous power, daily totals, and deltas).
 - **Storage**: each run persists forecast snapshots and MPPT stats to DynamoDB tables for historical comparison.
 - **Delivery**: the results are formatted into emoji-friendly blocks and posted to the configured Telegram chat.
 - **Schedules**: CloudWatch cron triggers fire the `morning` Lambda at 04:00 UTC (07:00 Kyiv) and the `evening` Lambda at 19:00 UTC (22:00 Kyiv).
@@ -23,11 +23,13 @@ Serverless (AWS Lambda) automation that pulls a daily production forecast and li
 ```text
 #mppt_totals
 ⚡ Current: 4.8 A
-🔋 Voltage: 53.5 V
+🔋 V: 53.5 V (SOC: 68%)
 🔌 Power: 273.5 W
 📈 Total: 2106.3 kWh
 📊 Today: 8.7 kWh
 ```
+
+> ℹ️ The SOC data is a voltage-derived estimate tuned for a 4S LiFePO₄ pack. If the measured voltage drops below the reference table the bot falls back to `❌ SOC: -1 %` to signal the value is unreliable.
 
 ## Project Structure
 

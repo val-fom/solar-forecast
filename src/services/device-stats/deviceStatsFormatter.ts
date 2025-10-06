@@ -9,7 +9,8 @@ export function formatDeviceTotalsMessage(
   totals: DevicesTotals,
   time?: 'morning' | 'evening',
 ): string[] {
-  const SOC = getSOC(totals.bat_voltage)
+  const SOC = Math.floor(getSOC(totals.bat_voltage))
+  const SOCIcon = SOC < 0 ? '❌' : SOC < 25 ? '🪫' : '🔋'
   const entries: Array<{
     icon: string
     label: string
@@ -17,12 +18,11 @@ export function formatDeviceTotalsMessage(
     unit: string
   }> = [
     { icon: '⚡', label: 'Current', value: totals.bat_current, unit: 'A' },
-    { icon: '🔋', label: 'Voltage', value: totals.bat_voltage, unit: 'V' },
     {
-      icon: SOC < 0 ? '❌' : SOC < 25 ? '🪫' : '🔋',
-      label: 'SOC',
-      value: SOC,
-      unit: '%',
+      icon: SOCIcon,
+      label: 'V',
+      value: totals.bat_voltage,
+      unit: `V (${SOC}%)`,
     },
     { icon: '🔌', label: 'Power', value: totals.power, unit: 'W' },
     { icon: '📈', label: 'Total', value: totals.electric_total, unit: 'kWh' },
