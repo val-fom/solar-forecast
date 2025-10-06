@@ -2,10 +2,10 @@ export function getSOC(voltage: number, seriesCount = 4): number {
   // Reference table for one LiFePO₄ battery (12V nominal)
   const table = [
     { soc: 0, voltage: 12.0 },
-    { soc: 25, voltage: 13.1 },
-    { soc: 50, voltage: 13.18 },
-    { soc: 75, voltage: 13.32 },
-    { soc: 100, voltage: 13.4 },
+    { soc: 25, voltage: 13.0 },
+    { soc: 50, voltage: 13.15 },
+    { soc: 75, voltage: 13.3 },
+    { soc: 100, voltage: 13.33 },
   ]
 
   // Scale the table voltage according to the number of elements in series
