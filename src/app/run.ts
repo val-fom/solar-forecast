@@ -11,7 +11,11 @@ export async function run(time?: 'morning' | 'evening'): Promise<void> {
     await sendResult(...forecastMessage)
 
     const deviceStats = await getDevicesStats()
-    const totalsMessage = formatDeviceTotalsMessage(deviceStats.totals, time)
+    const totalsMessage = formatDeviceTotalsMessage({
+      totals: deviceStats.totals,
+      devices: deviceStats.devicesStats,
+      time,
+    })
     await sendResult(...totalsMessage)
   } catch (error) {
     console.error(`Error in run(${time}) function:`, error)
@@ -22,7 +26,10 @@ export async function run(time?: 'morning' | 'evening'): Promise<void> {
 export async function sendDeviceStats(): Promise<void> {
   try {
     const deviceStats = await getDevicesStats()
-    const totalsMessage = formatDeviceTotalsMessage(deviceStats.totals)
+    const totalsMessage = formatDeviceTotalsMessage({
+      totals: deviceStats.totals,
+      devices: deviceStats.devicesStats,
+    })
     await sendResult(...totalsMessage)
   } catch (error) {
     console.error(`Error in sendDeviceStats function:`, error)

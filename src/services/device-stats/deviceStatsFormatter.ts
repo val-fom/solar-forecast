@@ -1,14 +1,21 @@
-import type { DevicesTotals } from './deviceStats.types'
+import type { DeviceStats, DevicesTotals } from './deviceStats.types'
 import { getSOC } from './getSOC'
 
 function formatNumber(value: number): string {
   return value.toFixed(1)
 }
 
-export function formatDeviceTotalsMessage(
-  totals: DevicesTotals,
-  time?: 'morning' | 'evening',
-): string[] {
+type FormatDeviceTotalsInput = {
+  totals: DevicesTotals
+  devices?: DeviceStats[]
+  time?: 'morning' | 'evening'
+}
+
+export function formatDeviceTotalsMessage({
+  totals,
+  devices = [],
+  time,
+}: FormatDeviceTotalsInput): string[] {
   const SOC = Math.floor(getSOC(totals.bat_voltage))
   const SOCIcon = SOC < 0 ? '❌' : SOC < 25 ? '🪫' : '🔋'
   const entries: Array<{
@@ -43,6 +50,28 @@ export function formatDeviceTotalsMessage(
     const valueText = `${formatNumber(entry.value as number)} ${entry.unit}`
     return `${entry.icon} ${label}: ${valueText}`
   })
+
+  const perDevicePowerLine = devices
+    .filter((device) => device.power !== undefined)
+    .map((device) => formatNumber(device.power))
+    .join(' + ')
+
+  if (perDevicePowerLine.length > 0) {
+    const powerIndex = lines.findIndex((line) => line.startsWith('🔌'))
+    const insertIndex = powerIndex >= 0 ? powerIndex + 1 : lines.length
+    lines.splice(insertIndex, 0, `🔢 (${perDevicePowerLine})`)
+  }
+
+  const perDeviceDailyLine = devices
+    .filter((device) => device.electric_total_diff !== undefined)
+    .map((device) => formatNumber(device.electric_total_diff as number))
+    .join(' + ')
+
+  if (perDeviceDailyLine.length > 0) {
+    const todayIndex = lines.findIndex((line) => line.startsWith('📊'))
+    const insertIndex = todayIndex >= 0 ? todayIndex + 1 : lines.length
+    lines.splice(insertIndex, 0, `🔢 (${perDeviceDailyLine})`)
+  }
 
   return [
     ...(dayTimeIcon ? [dayTimeIcon] : []),

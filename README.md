@@ -22,11 +22,13 @@ Serverless (AWS Lambda) automation that pulls a daily production forecast and li
 
 ```text
 #mppt_totals
-⚡ Current: 4.8 A
-🔋 Voltage: 53.5 V (68%)
-🔌 Power: 273.5 W
-📈 Total: 2106.3 kWh
-📊 Today: 8.7 kWh
+⚡ Current: 2.5 A
+🔋 Voltage: 52.9 V (62%)
+🔌 Power: 147.5 W
+🔢 (53.5 + 43.1 + 47.7 + 3.2)
+📈 Total: 2120.6 kWh
+📊 Today: 4.6 kWh
+🔢 (1.6 + 1.6 + 1.4 + 0.0)
 ```
 
 > ℹ️ The SOC data is a voltage-derived estimate tuned for a 4S LiFePO₄ pack. If the measured voltage drops below the reference table the bot falls back to `❌ SOC: -1 %` to signal the value is unreliable.

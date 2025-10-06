@@ -11,18 +11,52 @@ import { getYesterdaysLastDeviceStats } from './deviceStatsHistory'
 
 const { TUYA_DEVICE_ID } = config
 
-const devices = TUYA_DEVICE_ID.split(',')
-  .map((id) => id.trim())
-  .filter(Boolean)
+const devicesDictionary: Record<string, string> = Object.fromEntries(
+  TUYA_DEVICE_ID.split(',').map((pair) => {
+    const [name, id] = pair.split(':')
+    return [id, name]
+  }),
+)
+
+const devices = Object.keys(devicesDictionary)
 
 export async function getDevicesStats(): Promise<DevicesStatsResult> {
   const devicesProps = await getDevicesProperties(devices)
-  const stats = deriveDeviceStats(devicesProps)
+  let stats = deriveDeviceStats(devicesProps)
   const yesterdayStats = await getYesterdaysLastDeviceStats()
   if (yesterdayStats) {
-    stats.totals.electric_total_yesterday = yesterdayStats.totals.electric_total
-    stats.totals.electric_total_diff =
-      stats.totals.electric_total - yesterdayStats.totals.electric_total
+    const yesterdayTotals = yesterdayStats.totals.electric_total
+    const totalsDiff =
+      yesterdayTotals !== undefined
+        ? round(stats.totals.electric_total - yesterdayTotals)
+        : undefined
+    const yesterdayById = new Map(
+      yesterdayStats.devicesStats.map((device) => [
+        device.id,
+        device.electric_total,
+      ]),
+    )
+
+    stats = {
+      devicesStats: stats.devicesStats.map((device) => {
+        const previousTotal = yesterdayById.get(device.id)
+        const dailyDelta =
+          previousTotal !== undefined
+            ? round(device.electric_total - previousTotal)
+            : undefined
+
+        return {
+          ...device,
+          electric_total_yesterday: previousTotal,
+          electric_total_diff: dailyDelta,
+        }
+      }),
+      totals: {
+        ...stats.totals,
+        electric_total_yesterday: yesterdayTotals,
+        electric_total_diff: totalsDiff,
+      },
+    }
   }
   await saveDeviceStatsResult(stats)
   return stats
@@ -37,6 +71,7 @@ function deriveDeviceStats(devicesProps: DeviceProperty[]): DevicesStatsResult {
 
     return {
       id: device.id,
+      name: getDeviceName(device.id),
       bat_current: parseInt(propsMap.bat_current, 10) / 10,
       bat_voltage: parseInt(propsMap.bat_voltage, 10) / 10,
       electric_total: parseInt(propsMap.electric_total, 10) / 10,
@@ -77,4 +112,8 @@ function deriveDeviceStats(devicesProps: DeviceProperty[]): DevicesStatsResult {
 
 function round(value: number, decimals: number = 2): number {
   return Number(Math.round(Number(value + 'e' + decimals)) + 'e-' + decimals)
+}
+
+function getDeviceName(deviceId: string): string {
+  return devicesDictionary[deviceId] || deviceId
 }
