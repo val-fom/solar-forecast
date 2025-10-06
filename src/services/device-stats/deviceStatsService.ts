@@ -22,52 +22,61 @@ const devices = Object.keys(devicesDictionary)
 
 export async function getDevicesStats(): Promise<DevicesStatsResult> {
   const devicesProps = await getDevicesProperties(devices)
-  let stats = deriveDeviceStats(devicesProps)
+  const baseStats = deriveDeviceStats(devicesProps)
   const yesterdayStats = await getYesterdaysLastDeviceStats()
-  if (yesterdayStats) {
-    const yesterdayTotals = yesterdayStats.totals.electric_total
-    const totalsDiff =
-      yesterdayTotals !== undefined
-        ? round(stats.totals.electric_total - yesterdayTotals)
-        : undefined
-    const yesterdayById = new Map(
-      yesterdayStats.devicesStats.map((device) => [
-        device.id,
-        device.electric_total,
-      ]),
-    )
 
-    stats = {
-      devicesStats: stats.devicesStats.map((device) => {
-        const previousTotal = yesterdayById.get(device.id)
-        const dailyDelta =
-          previousTotal !== undefined
-            ? round(device.electric_total - previousTotal)
-            : undefined
+  const enrichedStats = yesterdayStats
+    ? enrichWithYesterdayData(baseStats, yesterdayStats)
+    : baseStats
 
-        return {
-          ...device,
-          electric_total_yesterday: previousTotal,
-          electric_total_diff: dailyDelta,
-        }
-      }),
-      totals: {
-        ...stats.totals,
-        electric_total_yesterday: yesterdayTotals,
-        electric_total_diff: totalsDiff,
-      },
-    }
+  await saveDeviceStatsResult(enrichedStats)
+  return enrichedStats
+}
+
+function enrichWithYesterdayData(
+  baseStats: DevicesStatsResult,
+  yesterdayStats: DevicesStatsResult,
+): DevicesStatsResult {
+  const yesterdayTotals = yesterdayStats.totals.electric_total
+  const totalsDiff =
+    yesterdayTotals !== undefined
+      ? round(baseStats.totals.electric_total - yesterdayTotals)
+      : undefined
+
+  const yesterdayById = new Map(
+    yesterdayStats.devicesStats.map((device) => [
+      device.id,
+      device.electric_total,
+    ]),
+  )
+
+  return {
+    devicesStats: baseStats.devicesStats.map((device) => {
+      const previousTotal = yesterdayById.get(device.id)
+      const dailyDelta =
+        previousTotal !== undefined
+          ? round(device.electric_total - previousTotal)
+          : undefined
+
+      return {
+        ...device,
+        electric_total_yesterday: previousTotal,
+        electric_total_diff: dailyDelta,
+      }
+    }),
+    totals: {
+      ...baseStats.totals,
+      electric_total_yesterday: yesterdayTotals,
+      electric_total_diff: totalsDiff,
+    },
   }
-  await saveDeviceStatsResult(stats)
-  return stats
 }
 
 function deriveDeviceStats(devicesProps: DeviceProperty[]): DevicesStatsResult {
   const statsList: DeviceStats[] = devicesProps.map((device) => {
-    const propsMap = device.properties.reduce((acc, prop) => {
-      acc[prop.code] = prop.value
-      return acc
-    }, {} as Record<string, string>)
+    const propsMap = Object.fromEntries(
+      device.properties.map((prop) => [prop.code, prop.value]),
+    )
 
     return {
       id: device.id,
@@ -81,32 +90,20 @@ function deriveDeviceStats(devicesProps: DeviceProperty[]): DevicesStatsResult {
     }
   })
 
-  const totals: DevicesTotals = statsList.reduce(
-    (acc, device) => {
-      acc.bat_current += device.bat_current
-      acc.power += device.power
-      acc.electric_total += device.electric_total
-
-      return acc
-    },
-    {
-      bat_current: 0,
-      bat_voltage: statsList.find((d) => d.bat_voltage)?.bat_voltage || 0,
-      electric_total: 0,
-      power: 0,
-    },
-  )
-
-  const roundedTotals: DevicesTotals = {
-    bat_current: round(totals.bat_current),
-    bat_voltage: round(totals.bat_voltage),
-    electric_total: round(totals.electric_total),
-    power: round(totals.power),
+  const totals: DevicesTotals = {
+    bat_current: round(
+      statsList.reduce((sum, device) => sum + device.bat_current, 0),
+    ),
+    bat_voltage: round(statsList.find((d) => d.bat_voltage)?.bat_voltage || 0),
+    electric_total: round(
+      statsList.reduce((sum, device) => sum + device.electric_total, 0),
+    ),
+    power: round(statsList.reduce((sum, device) => sum + device.power, 0)),
   }
 
   return {
     devicesStats: statsList,
-    totals: roundedTotals,
+    totals,
   }
 }
 
