@@ -65,7 +65,14 @@ Populate these values in your shell (for local runs) or provide them to the Serv
 ## Running Locally
 
 ```bash
-sls invoke local -f <morning|evening|manualRun>
+sls invoke local -f <morning|evening|manualRun --path payload.json>
+```
+
+```json
+// payload.json
+{
+  "body": "{\"message\":{\"chat\":{\"id\":<TELEGRAM_CHAT_ID>},\"text\":\"/mppt_totals\"}}"
+}
 ```
 
 The local run will send real Telegram messages; ensure you point to a test chat before experimenting.
