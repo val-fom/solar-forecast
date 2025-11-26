@@ -1,4 +1,5 @@
 import config from '../../config'
+import { fetchWithTimeout } from '../../utils/fetchWithTimeout'
 
 const { TELEGRAM_TOKEN, TELEGRAM_CHAT_ID } = config
 
@@ -15,7 +16,7 @@ export async function sendResult(...texts: any[]): Promise<any> {
   const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(
     normalizedText,
   )}`
-  const response = await fetch(url)
+  const response = await fetchWithTimeout(url)
   const result = await response.json()
   return result
 }

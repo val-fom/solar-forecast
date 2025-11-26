@@ -1,6 +1,7 @@
 import config from '../../../config'
 import { buildStringToSign } from '../auth/buildStringToSign'
 import { sign } from '../auth/sign'
+import { fetchWithTimeout } from '../../../utils/fetchWithTimeout'
 
 const { TUYA_ACCESS_ID, TUYA_ENDPOINT } = config
 
@@ -49,7 +50,7 @@ export async function callTuya<T>({
   if (accessToken) headers.access_token = accessToken
   if (payload) headers['Content-Type'] = 'application/json'
 
-  const response = await fetch(`${TUYA_ENDPOINT}${fullPath}`, {
+  const response = await fetchWithTimeout(`${TUYA_ENDPOINT}${fullPath}`, {
     method,
     headers,
     body: payload || undefined,

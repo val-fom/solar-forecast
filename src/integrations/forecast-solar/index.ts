@@ -1,4 +1,5 @@
 import type { ForecastResult } from '../../services/forecast/forecast.types'
+import { fetchWithTimeout } from '../../utils/fetchWithTimeout'
 
 type ForecastRequest = {
   lat: string
@@ -16,7 +17,7 @@ export async function fetchFieldForecast({
   capacityKwp,
 }: ForecastRequest): Promise<ForecastResult> {
   const url = `https://api.forecast.solar/estimate/${lat}/${lon}/${tilt}/${azimuth}/${capacityKwp}`
-  const response = await fetch(url)
+  const response = await fetchWithTimeout(url)
   if (!response.ok) {
     throw new Error(`${response.status} ${response.statusText}`)
   }

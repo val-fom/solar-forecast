@@ -1,6 +1,7 @@
 import config from '../../../config'
 import { sign } from './sign'
 import { buildStringToSign } from './buildStringToSign'
+import { fetchWithTimeout } from '../../../utils/fetchWithTimeout'
 
 const { TUYA_ACCESS_ID, TUYA_ENDPOINT } = config
 
@@ -21,7 +22,7 @@ export async function getTuyaToken(): Promise<{
     stringToSign,
   })
 
-  const res = await fetch(`${TUYA_ENDPOINT}${path}`, {
+  const res = await fetchWithTimeout(`${TUYA_ENDPOINT}${path}`, {
     headers: {
       client_id: TUYA_ACCESS_ID,
       sign: signature,

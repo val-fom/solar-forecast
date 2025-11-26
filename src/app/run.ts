@@ -6,10 +6,17 @@ import { sendResult } from '../integrations/telegram'
 
 export async function run(time?: 'morning' | 'evening'): Promise<void> {
   try {
+    // Fetch and send forecast
     const forecast = await getForecast()
     const forecastMessage = formatForecastMessage(forecast, time)
     await sendResult(...forecastMessage)
+  } catch (error) {
+    console.error(`Error in run(${time}) function [forecast]:`, error)
+    await sendResult('#error', (error as Error).message)
+  }
 
+  try {
+    // Fetch and send device stats
     const deviceStats = await getDevicesStats()
     const totalsMessage = formatDeviceTotalsMessage({
       totals: deviceStats.totals,
@@ -18,8 +25,8 @@ export async function run(time?: 'morning' | 'evening'): Promise<void> {
     })
     await sendResult(...totalsMessage)
   } catch (error) {
-    console.error(`Error in run(${time}) function:`, error)
-    await sendResult('#error', error)
+    console.error(`Error in run(${time}) function [deviceStats]:`, error)
+    await sendResult('#error', (error as Error).message)
   }
 }
 
