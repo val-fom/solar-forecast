@@ -1,4 +1,5 @@
 interface EventLog {
+  code: string
   event_time: number
   value: string
 }
@@ -9,6 +10,8 @@ interface EventLogsData {
 }
 
 interface AnalysisResult {
+  startTime: number
+  endTime: number
   trueTimeMs: number
   trueTimeHours: number
   falseTimeMs: number
@@ -24,8 +27,11 @@ export function analyzeEventLogs(
   fromTo: { start_time: number; end_time: number },
   fallbackValue: string = 'true',
 ): AnalysisResult {
+  const doorsContactLogs = data.logs.filter(
+    (log) => log.code === 'doorcontact_state',
+  )
   // Sort by event_time ascending (oldest to newest)
-  const sorted = [...data.logs].reverse()
+  const sorted = [...doorsContactLogs].reverse()
 
   let trueTimeMs = 0
   let falseTimeMs = 0
@@ -83,6 +89,8 @@ export function analyzeEventLogs(
   )
 
   return {
+    startTime: fromTo.start_time,
+    endTime: fromTo.end_time,
     trueTimeMs,
     trueTimeHours: parseFloat((trueTimeMs / 1000 / 60 / 60).toFixed(2)),
     falseTimeMs,

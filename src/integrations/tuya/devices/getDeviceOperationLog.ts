@@ -10,7 +10,7 @@ export type OperationLogResult = {
   }>
 }
 
-export async function getDoorsContactLog(
+export async function getDeviceOperationLog(
   deviceId: string,
   query: { start_time: number; end_time: number },
 ): Promise<OperationLogResult> {
@@ -26,7 +26,7 @@ export async function getDoorsContactLog(
       query: {
         query_type: 1,
         size: 100, // max 100
-        type: '7',
+        type: '7', // data point reporting
         start_time: query.start_time,
         end_time: endTime,
       },
@@ -41,12 +41,8 @@ export async function getDoorsContactLog(
     }
   }
 
-  const doorsContactLogsOnly = allLogs.filter(
-    (log) => log.code === 'doorcontact_state',
-  )
-
   return {
     has_next: false,
-    logs: doorsContactLogsOnly,
+    logs: allLogs,
   }
 }

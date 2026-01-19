@@ -1,5 +1,8 @@
 import config from '../config'
-import { getDevicesProperties, getDoorsContactLog } from '../integrations/tuya'
+import {
+  getDevicesProperties,
+  getDeviceOperationLog,
+} from '../integrations/tuya'
 import {
   analyzeEventLogs,
   formatAnalysisResult,
@@ -18,7 +21,7 @@ export const test = async () => {
     end_time: Date.now(),
   }
 
-  const deviceOperationLog = await getDoorsContactLog(
+  const deviceOperationLog = await getDeviceOperationLog(
     TUYA_DEVICE_ID_TEST,
     fromTo,
   )
@@ -31,7 +34,7 @@ export const test = async () => {
   )
   console.log('\n' + formatAnalysisResult(analysis))
 
-  return deviceOperationLog
+  return analysis
 }
 
 function getYesterdayDate() {
