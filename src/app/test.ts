@@ -1,5 +1,5 @@
 import config from '../config'
-import { getDevicesProperties, getOperationLog } from '../integrations/tuya'
+import { getDevicesProperties, getDoorsContactLog } from '../integrations/tuya'
 import {
   analyzeEventLogs,
   formatAnalysisResult,
@@ -8,14 +8,27 @@ import {
 const { TUYA_DEVICE_ID_TEST } = config
 
 export const test = async () => {
+  const devicesProperties = await getDevicesProperties([TUYA_DEVICE_ID_TEST])
+  const doorsContactState = devicesProperties
+    .find((device) => device.id === TUYA_DEVICE_ID_TEST)
+    ?.properties.find((prop) => prop.code === 'doorcontact_state')?.value
+
   const fromTo = {
     start_time: +getYesterdayDate(),
     end_time: Date.now(),
   }
-  const deviceOperationLog = await getOperationLog(TUYA_DEVICE_ID_TEST, fromTo)
+
+  const deviceOperationLog = await getDoorsContactLog(
+    TUYA_DEVICE_ID_TEST,
+    fromTo,
+  )
 
   // Analyze event logs
-  const analysis = analyzeEventLogs(deviceOperationLog, fromTo)
+  const analysis = analyzeEventLogs(
+    deviceOperationLog,
+    fromTo,
+    doorsContactState?.toString(), // Convert to string for analysis
+  )
   console.log('\n' + formatAnalysisResult(analysis))
 
   return deviceOperationLog

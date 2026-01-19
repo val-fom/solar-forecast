@@ -22,6 +22,7 @@ interface AnalysisResult {
 export function analyzeEventLogs(
   data: EventLogsData,
   fromTo: { start_time: number; end_time: number },
+  fallbackValue: string = 'true',
 ): AnalysisResult {
   // Sort by event_time ascending (oldest to newest)
   const sorted = [...data.logs].reverse()
@@ -65,8 +66,12 @@ export function analyzeEventLogs(
       trueTimeMs += durationFromStart
     }
   } else {
-    // If no events, assume entire duration is true
-    trueTimeMs += fromTo.end_time - fromTo.start_time
+    // If no events, assume entire duration is fallbackValue
+    if (fallbackValue === 'true') {
+      trueTimeMs += fromTo.end_time - fromTo.start_time
+    } else {
+      falseTimeMs += fromTo.end_time - fromTo.start_time
+    }
   }
 
   const totalTimeMs = trueTimeMs + falseTimeMs

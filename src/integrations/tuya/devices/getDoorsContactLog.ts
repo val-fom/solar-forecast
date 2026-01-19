@@ -10,7 +10,7 @@ export type OperationLogResult = {
   }>
 }
 
-export async function getOperationLog(
+export async function getDoorsContactLog(
   deviceId: string,
   query: { start_time: number; end_time: number },
 ): Promise<OperationLogResult> {
