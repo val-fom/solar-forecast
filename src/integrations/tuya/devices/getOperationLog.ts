@@ -12,7 +12,7 @@ export type OperationLogResult = {
 
 export async function getOperationLog(
   deviceId: string,
-  query?: { start_time: number; end_time: number },
+  query: { start_time: number; end_time: number },
 ): Promise<OperationLogResult> {
   const { access_token } = await getTuyaToken()
 
@@ -23,7 +23,8 @@ export async function getOperationLog(
       query_type: 1,
       size: 100, // max 100
       type: '7',
-      ...query,
+      start_time: query.start_time,
+      end_time: query.end_time,
     },
   })
 
