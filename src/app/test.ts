@@ -1,5 +1,9 @@
 import config from '../config'
 import { getDevicesProperties, getOperationLog } from '../integrations/tuya'
+import {
+  analyzeEventLogs,
+  formatAnalysisResult,
+} from '../utils/analyzeEventLogs'
 
 const { TUYA_DEVICE_ID_TEST } = config
 
@@ -8,7 +12,11 @@ export const test = async () => {
     start_time: +getMonthStartDate(),
     end_time: Date.now(),
   })
-  console.log(JSON.stringify(deviceOperationLog, null, 2))
+
+  // Analyze event logs
+  const analysis = analyzeEventLogs(deviceOperationLog)
+  console.log('\n' + formatAnalysisResult(analysis))
+
   return deviceOperationLog
 }
 

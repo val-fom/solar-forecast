@@ -1,0 +1,86 @@
+interface EventLog {
+  event_time: number
+  value: string
+}
+
+interface EventLogsData {
+  has_next: boolean
+  logs: EventLog[]
+}
+
+interface AnalysisResult {
+  trueTimeMs: number
+  trueTimeHours: number
+  falseTimeMs: number
+  falseTimeHours: number
+  totalTimeMs: number
+  totalTimeHours: number
+  truePercentage: number
+  falsePercentage: number
+}
+
+export function analyzeEventLogs(data: EventLogsData): AnalysisResult {
+  // Sort by event_time ascending (oldest to newest)
+  const sorted = [...data.logs].reverse()
+
+  let trueTimeMs = 0
+  let falseTimeMs = 0
+
+  // Calculate duration between state changes
+  for (let i = 0; i < sorted.length - 1; i++) {
+    const current = sorted[i]
+    const next = sorted[i + 1]
+    const duration = next.event_time - current.event_time
+
+    if (current.value === 'true') {
+      trueTimeMs += duration
+    } else {
+      falseTimeMs += duration
+    }
+  }
+
+  // Add duration from last event to current time
+  if (sorted.length > 0) {
+    const lastEvent = sorted.at(-1)!
+    const durationToNow = Date.now() - lastEvent.event_time
+
+    if (lastEvent.value === 'true') {
+      trueTimeMs += durationToNow
+    } else {
+      falseTimeMs += durationToNow
+    }
+  }
+
+  const totalTimeMs = trueTimeMs + falseTimeMs
+  const truePercentage = parseFloat(
+    ((trueTimeMs / totalTimeMs) * 100).toFixed(2),
+  )
+  const falsePercentage = parseFloat(
+    ((falseTimeMs / totalTimeMs) * 100).toFixed(2),
+  )
+
+  return {
+    trueTimeMs,
+    trueTimeHours: parseFloat((trueTimeMs / 1000 / 60 / 60).toFixed(2)),
+    falseTimeMs,
+    falseTimeHours: parseFloat((falseTimeMs / 1000 / 60 / 60).toFixed(2)),
+    totalTimeMs,
+    totalTimeHours: parseFloat((totalTimeMs / 1000 / 60 / 60).toFixed(2)),
+    truePercentage,
+    falsePercentage,
+  }
+}
+
+export function formatAnalysisResult(result: AnalysisResult): string {
+  return `
+Event Log Analysis:
+==================
+True duration:  ${result.trueTimeHours} hours (${result.trueTimeMs}ms)
+False duration: ${result.falseTimeHours} hours (${result.falseTimeMs}ms)
+Total duration: ${result.totalTimeHours} hours (${result.totalTimeMs}ms)
+
+Percentage:
+True:  ${result.truePercentage}%
+False: ${result.falsePercentage}%
+  `.trim()
+}
