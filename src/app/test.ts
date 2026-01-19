@@ -8,12 +8,14 @@ import {
   formatAnalysisResult,
 } from '../utils/analyzeEventLogs'
 
-const { TUYA_DEVICE_ID_TEST } = config
+const { TUYA_GRID_SENSOR_DEVICE_ID } = config
 
 export const test = async () => {
-  const devicesProperties = await getDevicesProperties([TUYA_DEVICE_ID_TEST])
+  const devicesProperties = await getDevicesProperties([
+    TUYA_GRID_SENSOR_DEVICE_ID,
+  ])
   const doorsContactState = devicesProperties
-    .find((device) => device.id === TUYA_DEVICE_ID_TEST)
+    .find((device) => device.id === TUYA_GRID_SENSOR_DEVICE_ID)
     ?.properties.find((prop) => prop.code === 'doorcontact_state')?.value
 
   const fromTo = {
@@ -22,7 +24,7 @@ export const test = async () => {
   }
 
   const deviceOperationLog = await getDeviceOperationLog(
-    TUYA_DEVICE_ID_TEST,
+    TUYA_GRID_SENSOR_DEVICE_ID,
     fromTo,
   )
 
