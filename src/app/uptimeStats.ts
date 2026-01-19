@@ -12,35 +12,35 @@ import { sendResult } from '../integrations/telegram'
 
 const { TUYA_GRID_SENSOR_DEVICE_ID } = config
 
-export const sendGridSensorStats = async () => {
-  const devicesProperties = await getDevicesProperties([
-    TUYA_GRID_SENSOR_DEVICE_ID,
-  ])
-  const doorsContactState = getDoorsContactState(devicesProperties)
+export const uptimeStats = async () => {
+  try {
+    const devicesProperties = await getDevicesProperties([
+      TUYA_GRID_SENSOR_DEVICE_ID,
+    ])
+    const doorsContactState = getDoorsContactState(devicesProperties)
 
-  const fromTo = {
-    start_time: +getYesterdayDate(),
-    end_time: Date.now(),
+    const fromTo = {
+      start_time: +getYesterdayDate(),
+      end_time: Date.now(),
+    }
+
+    const deviceOperationLog = await getDeviceOperationLog(
+      TUYA_GRID_SENSOR_DEVICE_ID,
+      fromTo,
+    )
+
+    // Analyze event logs
+    const analysis = analyzeEventLogs(
+      deviceOperationLog,
+      fromTo,
+      doorsContactState,
+    )
+
+    await sendResult('#uptime', formatAnalysisResult(analysis))
+  } catch (error) {
+    console.error(`Error in uptimeStats function:`, error)
+    await sendResult('#error', (error as Error).message)
   }
-
-  const deviceOperationLog = await getDeviceOperationLog(
-    TUYA_GRID_SENSOR_DEVICE_ID,
-    fromTo,
-  )
-
-  // Analyze event logs
-  const analysis = analyzeEventLogs(
-    deviceOperationLog,
-    fromTo,
-    doorsContactState,
-  )
-
-  sendResult(
-    `📊 Grid Sensor Stats for ${new Date(fromTo.start_time).toDateString()}`,
-    formatAnalysisResult(analysis),
-  )
-
-  return analysis
 }
 
 function getDoorsContactState(devicesProperties: DeviceProperty[]) {

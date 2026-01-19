@@ -104,14 +104,11 @@ export function analyzeEventLogs(
 
 export function formatAnalysisResult(result: AnalysisResult): string {
   return `
-Event Log Analysis:
-==================
-True duration:  ${result.trueTimeHours} hours (${result.trueTimeMs}ms)
-False duration: ${result.falseTimeHours} hours (${result.falseTimeMs}ms)
-Total duration: ${result.totalTimeHours} hours (${result.totalTimeMs}ms)
+⚡ Power Status Report
 
-Percentage:
-True:  ${result.truePercentage}%
-False: ${result.falsePercentage}%
+Duration: ${result.totalTimeHours} hours
+
+🟢 Online:  ${result.trueTimeHours} hours (${result.truePercentage}%)
+🔴 Offline: ${result.falseTimeHours} hours (${result.falsePercentage}%)
   `.trim()
 }

@@ -1,7 +1,7 @@
 import { send } from 'process'
 import config from '../config'
 import { sendDeviceStats, run } from './run'
-import { sendGridSensorStats } from './sendGridSensorStats'
+import { uptimeStats } from './uptimeStats'
 
 const { TELEGRAM_CHAT_ID } = config
 
@@ -23,8 +23,8 @@ export const manualRun = async (event: any) => {
     await sendDeviceStats()
   }
 
-  if (text === '/grid_sensor_stats') {
-    await sendGridSensorStats()
+  if (text === '/uptime') {
+    await uptimeStats()
   }
 
   return { statusCode: 200 }
