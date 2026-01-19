@@ -1,14 +1,15 @@
 # Solar Forecast Bot
 
-Serverless (AWS Lambda) automation that pulls a daily production forecast and live MPPT statistics, then relays neatly formatted updates to Telegram twice per day. A lightweight HTTPS endpoint also listens for `/manual_run` to run the full workflow and `/mppt_totals` to fetch the latest MPPT totals on demand via Telegram.
+Serverless (AWS Lambda) automation that pulls a daily production forecast, live MPPT statistics, and grid-sensor uptime, then relays neatly formatted updates to Telegram twice per day. A lightweight HTTPS endpoint also listens for `/manual_run` to run the full workflow, `/mppt_totals` to fetch the latest MPPT totals on demand, and `/uptime` to report grid availability.
 
 ## Daily Flow
 
 - **Forecast** data comes from [forecast.solar](https://forecast.solar/); multiple field orientations are aggregated when both east/west strings are active.
 - **Device statistics** are fetched from Tuya-powered MPPT controllers and summarised (current, voltage, state-of-charge estimate, instantaneous power, daily totals, and deltas).
+- **Uptime stats** are calculated from Tuya operation logs for the grid sensor's door-contact signal to determine online/offline time.
 - **Storage**: each run persists forecast snapshots and MPPT stats to DynamoDB tables for historical comparison.
 - **Delivery**: the results are formatted into emoji-friendly blocks and posted to the configured Telegram chat.
-- **Schedules**: CloudWatch cron triggers fire the `morning` Lambda at 04:00 UTC (07:00 Kyiv) and the `evening` Lambda at 19:00 UTC (22:00 Kyiv).
+- **Schedules**: CloudWatch cron triggers fire the `morning` Lambda at 04:00 UTC (07:00 Kyiv), the `evening` Lambda at 19:00 UTC (22:00 Kyiv), and `uptimeStats` at 19:00 UTC (22:00 Kyiv).
 
 ### Telegram Output Examples
 
@@ -29,6 +30,16 @@ Serverless (AWS Lambda) automation that pulls a daily production forecast and li
 📈 Total: 2120.6 kWh
 📊 Today: 4.6 kWh
 🔢 (1.6 + 1.6 + 1.4 + 0.0)
+```
+
+```text
+#uptime
+⚡ Power Status Report
+
+Duration: 24 hours
+
+🟢 Online:  22 hours (91.67%)
+🔴 Offline: 2 hours (8.33%)
 ```
 
 > ℹ️ The SOC data is a voltage-derived estimate tuned for a 4S LiFePO₄ pack. If the measured voltage drops below the reference table the bot falls back to `❌ SOC: -1 %` to signal the value is unreliable.
@@ -58,6 +69,7 @@ serverless.yml        # Infrastructure definition (cron + manual-run API)
 | `DEVICE_STATS_TABLE_NAME`               | Injected by Serverless.                                                                                          |
 | `TUYA_ACCESS_ID` / `TUYA_ACCESS_SECRET` | Tuya cloud credentials.                                                                                          |
 | `TUYA_DEVICE_ID`                        | Comma-separated Tuya device IDs.                                                                                 |
+| `TUYA_GRID_SENSOR_DEVICE_ID`            | Tuya device ID for the grid sensor used by uptime reporting.                                                     |
 | `TUYA_ENDPOINT`                         | Tuya API base URL.                                                                                               |
 
 Populate these values in your shell (for local runs) or provide them to the Serverless deployment environment (e.g. via `.env` + `aws-vault`, CI secrets, or AWS Parameter Store).
@@ -97,11 +109,11 @@ The local run will send real Telegram messages; ensure you point to a test chat 
      --data '{"url":"https://xxxx.execute-api.eu-central-1.amazonaws.com/dev/manual-run"}'
    ```
 
-6. In Telegram, message `/manual_run` (full forecast + device stats) and `/mppt_totals` (device totals only) to confirm the webhook works as expected.
+6. In Telegram, message `/manual_run` (full forecast + device stats), `/mppt_totals` (device totals only), and `/uptime` (grid uptime) to confirm the webhook works as expected.
 7. Optionally, add both commands to your bot's command list using BotFather:
    - Open a chat with [BotFather](https://t.me/botfather) in Telegram.
    - Send `/mybots`, select your bot, then choose "Edit Commands".
-   - Add `/manual_run - Trigger an immediate update` and `/mppt_totals - Fetch the latest device totals`.
+   - Add `/manual_run - Trigger an immediate update`, `/mppt_totals - Fetch the latest device totals`, and `/uptime - Report grid uptime`.
 
 ## Useful References
 
