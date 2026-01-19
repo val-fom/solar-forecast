@@ -8,13 +8,14 @@ import {
 const { TUYA_DEVICE_ID_TEST } = config
 
 export const test = async () => {
-  const deviceOperationLog = await getOperationLog(TUYA_DEVICE_ID_TEST, {
-    start_time: +getMonthStartDate(),
+  const fromTo = {
+    start_time: +getYesterdayDate(),
     end_time: Date.now(),
-  })
+  }
+  const deviceOperationLog = await getOperationLog(TUYA_DEVICE_ID_TEST, fromTo)
 
   // Analyze event logs
-  const analysis = analyzeEventLogs(deviceOperationLog)
+  const analysis = analyzeEventLogs(deviceOperationLog, fromTo)
   console.log('\n' + formatAnalysisResult(analysis))
 
   return deviceOperationLog
@@ -25,10 +26,4 @@ function getYesterdayDate() {
   const yesterday = new Date(today)
   yesterday.setDate(today.getDate() - 1)
   return yesterday
-}
-
-function getMonthStartDate() {
-  const today = new Date()
-  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1)
-  return monthStart
 }
