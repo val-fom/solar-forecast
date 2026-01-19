@@ -32,6 +32,7 @@ provider:
     TUYA_ACCESS_ID: ${env:TUYA_ACCESS_ID}
     TUYA_ACCESS_SECRET: ${env:TUYA_ACCESS_SECRET}
     TUYA_DEVICE_ID: ${env:TUYA_DEVICE_ID}
+    TUYA_DEVICE_ID_TEST: ${env:TUYA_DEVICE_ID_TEST}
     TUYA_ENDPOINT: ${env:TUYA_ENDPOINT}
 
 functions:
@@ -51,6 +52,8 @@ functions:
       - http:
           path: manual-run
           method: post
+  test:
+    handler: handler.test
 
 package:
   patterns:
