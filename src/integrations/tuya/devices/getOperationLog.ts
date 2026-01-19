@@ -1,7 +1,14 @@
 import { callTuya } from './callTuya'
 import { getTuyaToken } from '../auth/getTuyaToken'
 
-export type OperationLogResult = Record<string, unknown>
+export type OperationLogResult = {
+  has_next: boolean
+  logs: Array<{
+    code: 'doorcontact_state'
+    event_time: number
+    value: 'true' | 'false'
+  }>
+}
 
 export async function getOperationLog(
   deviceId: string,
@@ -9,7 +16,7 @@ export async function getOperationLog(
 ): Promise<OperationLogResult> {
   const { access_token } = await getTuyaToken()
 
-  return callTuya<OperationLogResult>({
+  const result = await callTuya<OperationLogResult>({
     path: `/v2.0/cloud/thing/${deviceId}/logs`,
     accessToken: access_token,
     query: {
@@ -19,4 +26,6 @@ export async function getOperationLog(
       ...query,
     },
   })
+
+  return result
 }
