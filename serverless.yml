@@ -32,6 +32,7 @@ provider:
     TUYA_ACCESS_ID: ${env:TUYA_ACCESS_ID}
     TUYA_ACCESS_SECRET: ${env:TUYA_ACCESS_SECRET}
     TUYA_DEVICE_ID: ${env:TUYA_DEVICE_ID}
+    TUYA_GRID_SENSOR_DEVICE_ID: ${env:TUYA_GRID_SENSOR_DEVICE_ID}
     TUYA_ENDPOINT: ${env:TUYA_ENDPOINT}
 
 functions:
@@ -51,6 +52,11 @@ functions:
       - http:
           path: manual-run
           method: post
+  uptimeStats:
+    handler: handler.uptimeStats
+    events:
+      - schedule:
+          rate: cron(0 19 * * ? *)
 
 package:
   patterns:

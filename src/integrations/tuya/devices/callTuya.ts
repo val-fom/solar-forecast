@@ -10,7 +10,7 @@ type TuyaRequestOptions = {
   method?: 'GET' | 'POST'
   accessToken?: string
   body?: Record<string, unknown>
-  query?: Record<string, string | number>
+  query?: Record<string, string | number | undefined>
 }
 
 type TuyaResponse<T> = {
@@ -71,7 +71,7 @@ export async function callTuya<T>({
 
 function buildPath(
   path: string,
-  query?: Record<string, string | number>,
+  query?: Record<string, string | number | undefined>,
 ): {
   fullPath: string
   search: string
@@ -79,10 +79,13 @@ function buildPath(
   if (!query || Object.keys(query).length === 0) {
     return { fullPath: path, search: '' }
   }
-  const params = new URLSearchParams()
-  for (const [key, value] of Object.entries(query)) {
-    params.append(key, String(value))
+  const entries = Object.entries(query).filter(
+    ([, value]) => value !== undefined,
+  )
+  if (entries.length === 0) {
+    return { fullPath: path, search: '' }
   }
-  const search = params.toString()
+  entries.sort(([a], [b]) => a.localeCompare(b))
+  const search = entries.map(([key, value]) => `${key}=${value}`).join('&')
   return { fullPath: `${path}?${search}`, search }
 }
