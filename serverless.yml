@@ -52,8 +52,8 @@ functions:
       - http:
           path: manual-run
           method: post
-  test:
-    handler: handler.test
+  sendGridSensorStats:
+    handler: handler.sendGridSensorStats
 
 package:
   patterns:

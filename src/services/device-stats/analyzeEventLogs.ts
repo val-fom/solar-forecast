@@ -9,7 +9,7 @@ interface EventLogsData {
   logs: EventLog[]
 }
 
-interface AnalysisResult {
+export interface AnalysisResult {
   startTime: number
   endTime: number
   trueTimeMs: number
