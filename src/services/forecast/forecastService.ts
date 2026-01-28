@@ -6,23 +6,25 @@ import type { ForecastResult, WattsByHour } from './forecast.types'
 const { LAT, LON, SOUTH_ONLY } = config
 
 const southOnly = SOUTH_ONLY === 'true'
-const TILT = 30
 
 type ForecastScenario = {
   azimuth: number
   capacityKwp: number
+  tilt: number
 }
 
 const BASE_SCENARIOS: ForecastScenario[] = [
   {
     azimuth: 0,
     capacityKwp: 1.32,
+    tilt: 30,
   },
 ]
 
 const SIDE_SCENARIOS: ForecastScenario[] = [
-  { azimuth: -90, capacityKwp: 1.17 },
-  { azimuth: 90, capacityKwp: 1.17 },
+  { azimuth: -90, capacityKwp: 1.17, tilt: 30 },
+  { azimuth: 90, capacityKwp: 1.17, tilt: 30 },
+  { azimuth: 0, capacityKwp: 1.45, tilt: 90 },
 ]
 
 export async function getForecast(): Promise<ForecastResult> {
@@ -35,7 +37,7 @@ export async function getForecast(): Promise<ForecastResult> {
       fetchFieldForecast({
         lat: LAT,
         lon: LON,
-        tilt: TILT,
+        tilt: scenario.tilt,
         azimuth: scenario.azimuth,
         capacityKwp: scenario.capacityKwp,
       }),
