@@ -2,3 +2,4 @@ node_modules
 .serverless
 *.pdf
 .env
+.DS_Store
