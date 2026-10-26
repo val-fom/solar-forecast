@@ -21,5 +21,5 @@ export async function fetchFieldForecast({
   if (!response.ok) {
     throw new Error(`${response.status} ${response.statusText}`)
   }
-  return response.json()
+  return (await response.json()) as ForecastResult
 }

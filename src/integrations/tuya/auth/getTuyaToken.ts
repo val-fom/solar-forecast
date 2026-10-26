@@ -37,6 +37,13 @@ export async function getTuyaToken(): Promise<{
       `Tuya token request failed: ${res.status} ${res.statusText} - ${body}`,
     )
   }
-  const result = await res.json()
+  const result = (await res.json()) as {
+    result: {
+      access_token: string
+      uid: string
+      expire_time: number
+      refresh_token: string
+    }
+  }
   return result.result
 }
