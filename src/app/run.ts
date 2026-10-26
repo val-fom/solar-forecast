@@ -18,13 +18,8 @@ export async function run(time?: 'morning' | 'evening'): Promise<void> {
 
   try {
     // Fetch and send device stats
-    const deviceStats = await getDevicesStats()
-    const totalsMessage = formatDeviceTotalsMessage({
-      totals: deviceStats.totals,
-      devices: deviceStats.devicesStats,
-      time,
-    })
-    await sendResult(...totalsMessage)
+    const report = await getSolarReport()
+    await sendResult(...formatSolarReport(report))
   } catch (error) {
     console.error(`Error in run(${time}) function [deviceStats]:`, error)
     await sendResult('#error', (error as Error).message)
