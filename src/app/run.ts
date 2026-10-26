@@ -1,8 +1,9 @@
 import { getForecast } from '../services/forecast/forecastService'
-import { getDevicesStats } from '../services/device-stats/deviceStatsService'
 import { formatForecastMessage } from '../services/forecast/forecastFormatter'
+import { getDevicesStats } from '../services/device-stats/deviceStatsService'
 import { formatDeviceTotalsMessage } from '../services/device-stats/deviceStatsFormatter'
 import { sendResult } from '../integrations/telegram'
+import { getSolarReport, formatSolarReport } from '../services/solar/solarReport'
 
 export async function run(time?: 'morning' | 'evening'): Promise<void> {
   try {
@@ -16,16 +17,11 @@ export async function run(time?: 'morning' | 'evening'): Promise<void> {
   }
 
   try {
-    // Fetch and send device stats
-    const deviceStats = await getDevicesStats()
-    const totalsMessage = formatDeviceTotalsMessage({
-      totals: deviceStats.totals,
-      devices: deviceStats.devicesStats,
-      time,
-    })
-    await sendResult(...totalsMessage)
+    // Fetch and send combined solar report
+    const report = await getSolarReport()
+    await sendResult(...formatSolarReport(report))
   } catch (error) {
-    console.error(`Error in run(${time}) function [deviceStats]:`, error)
+    console.error(`Error in run(${time}) function [solarReport]:`, error)
     await sendResult('#error', (error as Error).message)
   }
 }

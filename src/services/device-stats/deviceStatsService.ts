@@ -37,12 +37,6 @@ function enrichWithYesterdayData(
   baseStats: DevicesStatsResult,
   yesterdayStats: DevicesStatsResult,
 ): DevicesStatsResult {
-  const yesterdayTotals = yesterdayStats.totals.electric_total
-  const totalsDiff =
-    yesterdayTotals !== undefined
-      ? round(baseStats.totals.electric_total - yesterdayTotals)
-      : undefined
-
   const yesterdayById = new Map(
     yesterdayStats.devicesStats.map((device) => [
       device.id,
@@ -50,24 +44,52 @@ function enrichWithYesterdayData(
     ]),
   )
 
-  return {
-    devicesStats: baseStats.devicesStats.map((device) => {
-      const previousTotal = yesterdayById.get(device.id)
-      const dailyDelta =
-        previousTotal !== undefined
-          ? round(device.electric_total - previousTotal)
-          : undefined
+  // Compare by stable device ID, never by sum of the old device set.
+  // Otherwise retiring MPPT #4 makes the daily delta incorrectly negative.
+  const devicesStats = baseStats.devicesStats.map((device) => {
+    const previousTotal = yesterdayById.get(device.id)
+    // If the controller has reset/replaced its lifetime counter, do not
+    // report a negative amount of energy as today's production.
+    const dailyDelta =
+      previousTotal !== undefined &&
+      device.electric_total >= previousTotal
+        ? round(device.electric_total - previousTotal)
+        : undefined
 
-      return {
-        ...device,
-        electric_total_yesterday: previousTotal,
-        electric_total_diff: dailyDelta,
-      }
-    }),
+    return {
+      ...device,
+      electric_total_yesterday: previousTotal,
+      electric_total_diff: dailyDelta,
+    }
+  })
+
+  const allHaveBaseline = devicesStats.every(
+    (device) => device.electric_total_diff !== undefined,
+  )
+  const baselineTotal = allHaveBaseline
+    ? round(
+        devicesStats.reduce(
+          (sum, device) => sum + (device.electric_total_yesterday ?? 0),
+          0,
+        ),
+      )
+    : undefined
+  const dailyTotal = allHaveBaseline
+    ? round(
+        devicesStats.reduce(
+          (sum, device) => sum + (device.electric_total_diff ?? 0),
+          0,
+        ),
+      )
+    : undefined
+
+  return {
+    devicesStats,
     totals: {
       ...baseStats.totals,
-      electric_total_yesterday: yesterdayTotals,
-      electric_total_diff: totalsDiff,
+      // This baseline includes only currently active MPPTs.
+      electric_total_yesterday: baselineTotal,
+      electric_total_diff: dailyTotal,
     },
   }
 }
