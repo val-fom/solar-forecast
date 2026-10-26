@@ -163,3 +163,25 @@ Important accounting notes:
 The `/solar` report is available on demand and is also sent in the morning and evening scheduled runs. The legacy `/mppt_totals` command remains available. Each solar report saves Tuya samples as legacy `deviceStats` records and Growatt samples as `growattStats` records in the existing DynamoDB table. The raw Growatt counters and timestamps are stored for future historical analysis; a historical reporting command is not yet implemented.
 
 Tuya daily generation is matched by device ID against the latest snapshot from the previous UTC day. A missing baseline or decreasing counter is omitted rather than being reported as negative generation. This baseline is not a precise Kyiv-local midnight measurement, and Growatt's daily counters can reset at a different day boundary.
+
+### Estimated net battery power (Growatt + external MPPT)
+
+When both Tuya MPPT and Growatt readings are available, the `/solar`
+battery section now displays an **estimate**, not a BMS measurement:
+
+`Net battery (W) ≈ MakeSkyBlue DC power (W) − Growatt pBat (W)`
+
+For Growatt SPF, `pBat` uses the hardware convention **positive =
+battery discharge; negative = charging**. Thus a positive net estimate
+means charging. For example, external MPPT = 210.2 W and `pBat = -38 W`
+yield 248.2 W *estimated* net charging, not 172.2 W. The apparent
+agreement of 172.2 W with a separate BMS reading does not verify the
+sign convention. Confirm it against measurements if the Growatt API
+uses different semantics.
+
+The estimate assumes the external MPPT controllers feed the same battery
+DC bus and that the samples are nearly simultaneous. Conversion losses,
+other DC loads and delayed cloud telemetry cause differences from actual
+BMS/shunt measurements. If Growatt reports `lost=true`, the estimate
+is explicitly marked as potentially stale. No extra API call or CW24
+integration is introduced.

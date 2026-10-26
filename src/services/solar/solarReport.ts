@@ -2,6 +2,7 @@ import { getDevicesStats } from '../device-stats/deviceStatsService'
 import { getGrowattStats, type GrowattStats } from '../../integrations/growatt'
 import type { DevicesStatsResult } from '../device-stats/deviceStats.types'
 import { saveGrowattStats } from '../../persistence/dynamo/growattStatsRepository'
+import { estimateNetBatteryPowerW } from './batteryPowerEstimate'
 
 export type SolarReport = {
   tuya?: DevicesStatsResult
@@ -66,6 +67,24 @@ export function formatSolarReport(report: SolarReport): string[] {
     lines.push('SOC: ' + fmt(growatt.batterySoc, 0) + '%')
     lines.push('Voltage: ' + fmt(growatt.batteryVoltage, 2) + ' V')
     lines.push('Power (raw signed): ' + fmt(growatt.batteryPower) + ' W')
+    if (tuya) {
+      const estimatedNetPower = estimateNetBatteryPowerW(
+        tuya.totals.power,
+        growatt.batteryPower,
+      )
+      if (estimatedNetPower !== undefined) {
+        const flow = estimatedNetPower > 0
+          ? 'Charging'
+          : estimatedNetPower < 0
+            ? 'Discharging'
+            : 'Idle'
+        lines.push(
+          'Net battery (estimated): ' +
+          flow + ' ' + fmt(Math.abs(estimatedNetPower)) + ' W' +
+          (growatt.lost ? ' ⚠️ Growatt offline/stale' : ''),
+        )
+      }
+    }
     lines.push('Discharged today: ' + fmt(growatt.batteryDischargedToday) + ' kWh')
     lines.push('', '🏠 HOUSE')
     lines.push('Load: ' + fmt(growatt.outputPower) + ' W')
