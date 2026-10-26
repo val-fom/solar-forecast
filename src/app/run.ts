@@ -1,7 +1,5 @@
 import { getForecast } from '../services/forecast/forecastService'
-import { getDevicesStats } from '../services/device-stats/deviceStatsService'
 import { formatForecastMessage } from '../services/forecast/forecastFormatter'
-import { formatDeviceTotalsMessage } from '../services/device-stats/deviceStatsFormatter'
 import { sendResult } from '../integrations/telegram'
 import { getSolarReport, formatSolarReport } from '../services/solar/solarReport'
 
