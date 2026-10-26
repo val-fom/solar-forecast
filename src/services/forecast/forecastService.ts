@@ -16,7 +16,7 @@ type ForecastScenario = {
 const BASE_SCENARIOS: ForecastScenario[] = [
   {
     azimuth: 0,
-    capacityKwp: 1.32,
+    capacityKwp: 5.07, // 1.32 kWp existing + 3.75 kWp new south-facing string
     tilt: 30,
   },
 ]
