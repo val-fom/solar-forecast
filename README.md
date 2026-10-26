@@ -120,3 +120,45 @@ The local run will send real Telegram messages; ensure you point to a test chat 
 - [Serverless schedule event docs](https://www.serverless.com/framework/docs/providers/aws/events/schedule/)
 - [Telegram Bot API](https://core.telegram.org/bots/api)
 - [forecast.solar API](https://forecast.solar/)
+
+
+## Combined solar report (Growatt + Tuya)
+
+The new Telegram command `/solar` combines the current MakeSkyBlue MPPT
+controllers configured under `TUYA_DEVICE_ID` with the PV input of Growatt
+SPF 6000 ES Plus. The existing `/mppt_totals` and other commands are unchanged.
+
+Required optional Growatt environment variables:
+
+- `GROWATT_API_TOKEN`: personal token generated in ShinePhone.
+- `GROWATT_DEVICE_SN`: inverter serial number (not the datalogger serial).
+
+The official OpenAPI V4 query uses `POST https://openapi.growatt.com/v4/new-api/queryLastData`
+with `deviceType=storage` and `deviceSn`, authenticated via a `token` header.
+Never commit the token. The report shows a warning instead of inventing a
+combined total if a provider fails.
+
+**Update `TUYA_DEVICE_ID` to list only the three active MPPT controllers**
+(e.g. `East:id1,West:id2,South:id3`). The removed fourth MPPT must not
+be included in current power or daily-production aggregation. Keep the old
+DynamoDB snapshots for historical accounting.
+
+Important accounting notes:
+
+- Combined PV power = 3 active Tuya MPPT powers + Growatt PV1 + PV2.
+- Combined daily PV energy = current Tuya yesterday-snapshot deltas +
+  Growatt `epvToday`. Tuya deltas approximate "today" rather than
+  necessarily resetting at local midnight; treat as provisional.
+- Growatt `epvTotal` alone is **not** lifetime PV production for the entire
+  installation. Keep retired MPPT lifetime history separately to avoid
+  dropping historical output.
+- The house load and battery counters from Growatt must not be added to
+  PV generation. Some external MPPT energy enters the common battery bus.
+- `eacDisChargeToday` is reported as today's AC-side consumption. It is not
+  grid import. `eacChargeToday` is AC battery charging, not total grid import.
+- `pBat` is presented as a signed raw value until its sign has been
+  verified against actual operating conditions.
+- Check Growatt `time` and `lost`: cloud data can be delayed.
+
+The `/solar` report is on demand. Scheduled forecast and MPPT reports
+have not been changed.
