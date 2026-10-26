@@ -17,11 +17,11 @@ export async function run(time?: 'morning' | 'evening'): Promise<void> {
   }
 
   try {
-    // Fetch and send device stats
+    // Fetch and send combined solar report
     const report = await getSolarReport()
     await sendResult(...formatSolarReport(report))
   } catch (error) {
-    console.error(`Error in run(${time}) function [deviceStats]:`, error)
+    console.error(`Error in run(${time}) function [solarReport]:`, error)
     await sendResult('#error', (error as Error).message)
   }
 }
