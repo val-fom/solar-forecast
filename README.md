@@ -160,5 +160,6 @@ Important accounting notes:
   verified against actual operating conditions.
 - Check Growatt `time` and `lost`: cloud data can be delayed.
 
-The `/solar` report is on demand. Scheduled forecast and MPPT reports
-have not been changed.
+The `/solar` report is available on demand and is also sent in the morning and evening scheduled runs. The legacy `/mppt_totals` command remains available. Each solar report saves Tuya samples as legacy `deviceStats` records and Growatt samples as `growattStats` records in the existing DynamoDB table. The raw Growatt counters and timestamps are stored for future historical analysis; a historical reporting command is not yet implemented.
+
+Tuya daily generation is matched by device ID against the latest snapshot from the previous UTC day. A missing baseline or decreasing counter is omitted rather than being reported as negative generation. This baseline is not a precise Kyiv-local midnight measurement, and Growatt's daily counters can reset at a different day boundary.
