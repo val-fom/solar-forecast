@@ -1,5 +1,5 @@
 import { getDevicesStats } from '../device-stats/deviceStatsService'
-import { getGrowattStats, GrowattStats } from '../../integrations/growatt/getGrowattStats'
+import { getGrowattStats, type GrowattStats } from '../../integrations/growatt'
 import type { DevicesStatsResult } from '../device-stats/deviceStats.types'
 import { saveGrowattStats } from '../../persistence/dynamo/growattStatsRepository'
 

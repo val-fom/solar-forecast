@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto'
 import config from '../../config'
 import { putItem } from './dynamoClient'
-import type { GrowattStats } from '../../integrations/growatt/getGrowattStats'
+import type { GrowattStats } from '../../integrations/growatt'
 
 // Keep existing deviceStats records untouched. Different partition key
 // allows historical Growatt samples in the same DynamoDB table.

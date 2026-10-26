@@ -128,7 +128,7 @@ The new Telegram command `/solar` combines the current MakeSkyBlue MPPT
 controllers configured under `TUYA_DEVICE_ID` with the PV input of Growatt
 SPF 6000 ES Plus. The existing `/mppt_totals` and other commands are unchanged.
 
-Required optional Growatt environment variables:
+Growatt environment variables (required to enable Growatt reporting):
 
 - `GROWATT_API_TOKEN`: personal token generated in ShinePhone.
 - `GROWATT_DEVICE_SN`: inverter serial number (not the datalogger serial).
