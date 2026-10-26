@@ -16,6 +16,13 @@ export async function getSolarReport(): Promise<SolarReport> {
     getDevicesStats(),
     getGrowattStats(),
   ])
+  if (growatt.status === 'fulfilled') {
+    try {
+      await saveGrowattStats(growatt.value)
+    } catch (error) {
+      console.error('Growatt stats persistence failed:', error)
+    }
+  }
   return {
     tuya: tuya.status === 'fulfilled' ? tuya.value : undefined,
     growatt: growatt.status === 'fulfilled' ? growatt.value : undefined,
