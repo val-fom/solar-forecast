@@ -1,6 +1,7 @@
 import { getDevicesStats } from '../device-stats/deviceStatsService'
 import { getGrowattStats, GrowattStats } from '../../integrations/growatt/getGrowattStats'
 import type { DevicesStatsResult } from '../device-stats/deviceStats.types'
+import { saveGrowattStats } from '../../persistence/dynamo/growattStatsRepository'
 
 export type SolarReport = {
   tuya?: DevicesStatsResult
