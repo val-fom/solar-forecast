@@ -51,7 +51,7 @@ export function analyzeEventLogs(
 
   // Add duration from last event to end time
   if (sorted.length > 0) {
-    const lastEvent = sorted.at(-1)!
+    const lastEvent = sorted[sorted.length - 1]
     const durationToNow = fromTo.end_time - lastEvent.event_time
 
     if (lastEvent.value === 'true') {

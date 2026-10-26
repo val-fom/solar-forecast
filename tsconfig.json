@@ -20,6 +20,6 @@
       "module": "ES2020"
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "handler.ts"],
   "exclude": ["node_modules"]
 }
