@@ -160,7 +160,7 @@ Important accounting notes:
   grid import. `eacChargeToday` is AC battery charging, not total grid import.
 - `pBat` is presented as a signed raw value until its sign has been
   verified against actual operating conditions.
-- Check Growatt `time` and `lost`: cloud data can be delayed.
+- Check Growatt `time`: cloud data can be delayed.
 
 The `/solar` report is available on demand and is also sent in the morning and evening scheduled runs. The legacy `/mppt_totals` command remains available. Each solar report saves Tuya samples as legacy `deviceStats` records and Growatt samples as `growattStats` records in the existing DynamoDB table. The raw Growatt counters and timestamps are stored for future historical analysis; a historical reporting command is not yet implemented.
 
@@ -212,6 +212,5 @@ uses different semantics.
 The estimate assumes the external MPPT controllers feed the same battery
 DC bus and that the samples are nearly simultaneous. Conversion losses,
 other DC loads and delayed cloud telemetry cause differences from actual
-BMS/shunt measurements. If Growatt reports `lost=true`, the estimate
-is not displayed in the compact report. No extra API call or CW24
-integration is introduced.
+BMS/shunt measurements. No extra API call or CW24 integration is
+introduced.
