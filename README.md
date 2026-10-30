@@ -138,14 +138,16 @@ with `deviceType=storage` and `deviceSn`, authenticated via a `token` header.
 Never commit the token. The report shows a warning instead of inventing a
 combined total if a provider fails.
 
-**Update `TUYA_DEVICE_ID` to list only the three active MPPT controllers**
-(e.g. `East:id1,West:id2,South:id3`). The removed fourth MPPT must not
-be included in current power or daily-production aggregation. Keep the old
-DynamoDB snapshots for historical accounting.
+Keep `TUYA_DEVICE_ID` aligned with the MPPT controllers included in the report.
+The compact `/solar` output lists each controller in configuration order
+(currently four). An inactive controller can remain configured at 0 W if
+its lifetime counter is readable. Removing it also removes its historical
+production from the dynamically summed `Total` until that history is
+accounted for separately.
 
 Important accounting notes:
 
-- Combined PV power = 3 active Tuya MPPT powers + Growatt PV1 + PV2.
+- Combined PV power = configured Tuya MPPT powers + Growatt PV1 + PV2.
 - Combined daily PV energy = current Tuya yesterday-snapshot deltas +
   Growatt `epvToday`. Tuya deltas approximate "today" rather than
   necessarily resetting at local midnight; treat as provisional.
@@ -158,16 +160,44 @@ Important accounting notes:
   grid import. `eacChargeToday` is AC battery charging, not total grid import.
 - `pBat` is presented as a signed raw value until its sign has been
   verified against actual operating conditions.
-- Check Growatt `time` and `lost`: cloud data can be delayed.
+- Check Growatt `time`: cloud data can be delayed.
 
 The `/solar` report is available on demand and is also sent in the morning and evening scheduled runs. The legacy `/mppt_totals` command remains available. Each solar report saves Tuya samples as legacy `deviceStats` records and Growatt samples as `growattStats` records in the existing DynamoDB table. The raw Growatt counters and timestamps are stored for future historical analysis; a historical reporting command is not yet implemented.
 
 Tuya daily generation is matched by device ID against the latest snapshot from the previous UTC day. A missing baseline or decreasing counter is omitted rather than being reported as negative generation. This baseline is not a precise Kyiv-local midnight measurement, and Growatt's daily counters can reset at a different day boundary.
 
+### Compact /solar output
+
+The short report follows the previous `/mppt_totals` style:
+
+```text
+#solar
+☀️ Generation: 526.0 W
+MPPT: 312.0 W (100.6 + 160.3 + 0.0 + 51.1)
+Growatt: 214.0 W
+📈 Total: 5845.1 kWh
+📊 Today: 0.8 kWh
+MPPT: 0.4 kWh (0.1 + 0.2 + 0.0 + 0.1)
+Growatt: 0.4 kWh
+🏠 House: 1171.0 W
+🏠 Today: 8.4 kWh
+🔌 Grid: 0.0 W
+```
+
+`Total` is the sum of the **currently configured** Tuya MPPT lifetime
+counters and the Growatt PV lifetime counter, not a persisted all-time
+accounting baseline. Tuya daily values are estimated from the previous
+UTC day's latest snapshot. Missing provider data produces `—` for
+combined figures, not a misleading partial sum; missing controller
+daily baselines are also shown as `—`. The report no longer displays
+battery telemetry, temperature, Growatt timestamp, `lost`, or stale
+warnings. Raw Growatt samples are still stored in DynamoDB.
+
 ### Estimated net battery power (Growatt + external MPPT)
 
-When both Tuya MPPT and Growatt readings are available, the `/solar`
-battery section now displays an **estimate**, not a BMS measurement:
+The battery estimate helper is kept for future diagnostics, but the
+compact `/solar` report no longer displays battery telemetry.
+The calculation is an **estimate**, not a BMS measurement:
 
 `Net battery (W) ≈ MakeSkyBlue DC power (W) − Growatt pBat (W)`
 
@@ -182,6 +212,5 @@ uses different semantics.
 The estimate assumes the external MPPT controllers feed the same battery
 DC bus and that the samples are nearly simultaneous. Conversion losses,
 other DC loads and delayed cloud telemetry cause differences from actual
-BMS/shunt measurements. If Growatt reports `lost=true`, the estimate
-is explicitly marked as potentially stale. No extra API call or CW24
-integration is introduced.
+BMS/shunt measurements. No extra API call or CW24 integration is
+introduced.
